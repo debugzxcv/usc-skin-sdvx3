@@ -42,7 +42,8 @@ void main()
     // x += 0.5;
 
     float s = float(hitState);
-	vec4 mainColor = texture(mainTex, vec2(x, s / 4 + fsTex.y / 4));
+    float y = mod(fsTex.y, 1.0f);
+	vec4 mainColor = texture(mainTex, vec2(x, s / 4 + y / 4));
 
     //target = mainColor * color;
     vec3 mainHsv = rgb2hsv(mainColor.xyz);
