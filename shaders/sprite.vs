@@ -17,12 +17,4 @@ void main()
 {
 	fsTex = inTex;
 	gl_Position = proj * camera * world * vec4(inPos.xy, 0, 1);
-
-	// mat4 originalMatrix = camera * world;
-	// mat4 result;
-	// result[0] = vec4(length(originalMatrix[0].xyz), .0, .0, .0);
-	// result[1] = vec4(.0, length(originalMatrix[1].xyz), .0, .0);
-	// result[2] = vec4(.0, .0, length(originalMatrix[2].xyz), .0);
-	// result[3] = originalMatrix[3];
-	// gl_Position = proj * (result * vec4(inPos.xy, 0, 1));
 }

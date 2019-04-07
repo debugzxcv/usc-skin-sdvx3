@@ -120,8 +120,8 @@ local jacketFallback = gfx.CreateSkinImage("song_select/loading.png", 0)
 local bottomFill = gfx.CreateSkinImage("console/console.png", 0)
 local topFill = gfx.CreateSkinImage("fill_top.png", 0)
 local critAnim = gfx.CreateSkinImage("crit_anim.png", 0)
-local critCap = gfx.CreateSkinImage("crit_cap.png", 0)
-local critCapBack = gfx.CreateSkinImage("crit_cap_back.png", 0)
+local critBar = gfx.CreateSkinImage("crit_bar.png", 0)
+local critConsole = gfx.CreateSkinImage("crit_console.png", 0)
 local laserCursor = gfx.CreateSkinImage("pointer.png", 0)
 local laserCursorOverlay = gfx.CreateSkinImage("pointer_overlay.png", 0)
 
@@ -135,7 +135,7 @@ local consoleAnimImages = {
     gfx.CreateSkinImage("console/glow_btb.png", 0),
     gfx.CreateSkinImage("console/glow_btc.png", 0),
     gfx.CreateSkinImage("console/glow_btd.png", 0),
-    
+
     gfx.CreateSkinImage("console/glow_fxl.png", 0),
     gfx.CreateSkinImage("console/glow_fxr.png", 0),
 
@@ -170,7 +170,7 @@ local clearTexts = {"TRACK FAILED", "TRACK COMPLETE", "TRACK COMPLETE", "FULL CO
 function ResetLayoutInformation()
     resx, resy = game.GetResolution()
     portrait = resy > resx
-    desw = portrait and 720 or 1280 
+    desw = portrait and 720 or 1280
     desh = desw * (resy / resx)
     scale = resx / desw
 end
@@ -189,7 +189,7 @@ function render(deltaTime)
         gfx.FillColor(0, 0, 0, math.floor(255 * math.min(introTimer, 1)))
         gfx.DrawRect(RECT_FILL, 0, 0, resx, resy)
     end
-    
+
     gfx.Scale(scale, scale)
     local yshift = 0
 
@@ -246,53 +246,44 @@ function render_crit_base(deltaTime)
 
     critAnimTimer = critAnimTimer + deltaTime
     SetUpCritTransform()
-    
+
     -- Figure out how to offset the center of the crit line to remain
     --  centered on the players screen
     local xOffset = GetCritLineCenteringOffset()
     gfx.Translate(xOffset, 0)
-    
+
     -- Draw a transparent black overlay below the crit line
     -- This darkens the play area as it passes
     gfx.FillColor(0, 0, 0, 200)
     gfx.DrawRect(RECT_FILL, -resx, 0, resx * 2, resy)
+    gfx.FillColor(255, 255, 255)
 
     -- The absolute width of the crit line itself
     -- we check to see if we're playing in portrait mode and
     --  change the width accordingly
-    local critWidth = resx * (portrait and 1 or 0.8)
-    
+    local critWidth = resx * (portrait and 1.25 or 0.8)
+
     -- get the scaled dimensions of the crit line pieces
     local clw, clh = gfx.ImageSize(critAnim)
-    local critAnimHeight = 15 * scale
+    local critAnimHeight = 9 * scale
     local critAnimWidth = critAnimHeight * (clw / clh)
 
-    local ccw, cch = gfx.ImageSize(critCap)
-    local critCapHeight = critAnimHeight * (cch / clh)
-    local critCapWidth = critCapHeight * (ccw / cch)
-
-    -- draw the back half of the caps at each end
-    do
-        gfx.FillColor(255, 255, 255)
-        -- left side
-        gfx.DrawRect(critCapBack, -critWidth / 2 - critCapWidth / 2, -critCapHeight / 2, critCapWidth, critCapHeight)
-        gfx.Scale(-1, 1) -- scale to flip horizontally
-        -- right side
-        gfx.DrawRect(critCapBack, -critWidth / 2 - critCapWidth / 2, -critCapHeight / 2, critCapWidth, critCapHeight)
-        gfx.Scale(-1, 1) -- unflip horizontally
-    end
+    local cbw, cbh = gfx.ImageSize(critBar)
+    local critBarHeight = critAnimHeight * (cbh / clh)
+    local critBarWidth = critBarHeight * (cbw / cbh)
 
     -- render the core of the crit line
     do
         -- The crit line is made up of many small pieces scrolling outward
         -- Calculate how many pieces, starting at what offset, are require to
         --  completely fill the space with no gaps from edge to center
-        local numPieces = 1 + math.ceil(critWidth / (critAnimWidth * 2))
-        local startOffset = critAnimWidth * ((critAnimTimer * 1.5) % 1)
+        local animWidth = critWidth * 0.65
+        local numPieces = 1 + math.ceil(animWidth / (critAnimWidth * 2))
+        local startOffset = critAnimWidth * ((critAnimTimer * 0.15) % 1)
 
         -- left side
         -- Use a scissor to limit the drawable area to only what should be visible
-        gfx.Scissor(-critWidth / 2, -critAnimHeight / 2, critWidth / 2, critAnimHeight)
+        gfx.Scissor(-animWidth / 2, -critAnimHeight / 2, animWidth / 2, critAnimHeight)
         for i = 1, numPieces do
             gfx.DrawRect(critAnim, -startOffset - critAnimWidth * (i - 1), -critAnimHeight / 2, critAnimWidth, critAnimHeight)
         end
@@ -300,22 +291,24 @@ function render_crit_base(deltaTime)
 
         -- right side
         -- exactly the same, but in reverse
-        gfx.Scissor(0, -critAnimHeight / 2, critWidth / 2, critAnimHeight)
+        gfx.Scissor(0, -critAnimHeight / 2, animWidth / 2, critAnimHeight)
         for i = 1, numPieces do
             gfx.DrawRect(critAnim, -critAnimWidth + startOffset + critAnimWidth * (i - 1), -critAnimHeight / 2, critAnimWidth, critAnimHeight)
         end
         gfx.ResetScissor()
     end
 
-    -- Draw the front half of the caps at each end
-    do
-        gfx.FillColor(255, 255, 255)
-        -- left side
-        gfx.DrawRect(critCap, -critWidth / 2 - critCapWidth / 2, -critCapHeight / 2, critCapWidth, critCapHeight)
-        gfx.Scale(-1, 1) -- scale to flip horizontally
-        -- right side
-        gfx.DrawRect(critCap, -critWidth / 2 - critCapWidth / 2, -critCapHeight / 2, critCapWidth, critCapHeight)
-        gfx.Scale(-1, 1) -- unflip horizontally
+    -- Draw the critical bar
+    gfx.DrawRect(critBar, -critWidth / 2, -critBarHeight / 2 - 5 * scale, critWidth, critBarHeight)
+
+    -- Draw back portion of the console
+    if portrait then
+        local ccw, cch = gfx.ImageSize(critConsole)
+        local critConsoleHeight = 95 * scale
+        local critConsoleWidth = critConsoleHeight * (ccw / cch)
+
+        local critConsoleY = 95 * scale
+        gfx.DrawRect(critConsole, -critConsoleWidth / 2, -critConsoleHeight / 2 + critConsoleY, critConsoleWidth, critConsoleHeight)
     end
 
     -- we're done, reset graphics stuffs
@@ -344,7 +337,7 @@ function render_crit_overlay(deltaTime)
         local bfw, bfh = gfx.ImageSize(bottomFill)
 
         local distBetweenKnobs = 0.446
-        local distCritVertical = 0.098
+        local distCritVertical = -0.125
 
         local ioFillTx = bfw / 2
         local ioFillTy = bfh * distCritVertical -- 0.098
@@ -353,7 +346,7 @@ function render_crit_overlay(deltaTime)
         local io_x, io_y, io_w, io_h = -ioFillTx, -ioFillTy, bfw, bfh
 
         -- Adjust the transform accordingly first
-        local consoleFillScale = (resx * 0.775) / (bfw * distBetweenKnobs)
+        local consoleFillScale = (resx * 0.525) / (bfw * distBetweenKnobs)
         gfx.Scale(consoleFillScale, consoleFillScale);
 
         -- Actually draw the fill
@@ -361,10 +354,10 @@ function render_crit_overlay(deltaTime)
         gfx.DrawRect(bottomFill, io_x, io_y, io_w, io_h)
 
         -- Then draw the details which need to be colored to match the lasers
-        for i = 1, 2 do
-            gfx.FillLaserColor(i)
-            gfx.DrawRect(ioConsoleDetails[i], io_x, io_y, io_w, io_h)
-        end
+        -- for i = 1, 2 do
+        --     gfx.FillLaserColor(i)
+        --     gfx.DrawRect(ioConsoleDetails[i], io_x, io_y, io_w, io_h)
+        -- end
 
         -- Draw the button press animations by overlaying transparent images
         gfx.GlobalCompositeOperation(gfx.BLEND_OP_LIGHTER)
@@ -373,7 +366,7 @@ function render_crit_overlay(deltaTime)
             -- If not held, that timer is set back to 0
             if game.GetButton(buttonsInOrder[i]) then
                 consoleAnimTimers[i] = consoleAnimTimers[i] + deltaTime * consoleAnimSpeed * 3.14 * 2
-            else 
+            else
                 consoleAnimTimers[i] = 0
             end
 
@@ -387,7 +380,7 @@ function render_crit_overlay(deltaTime)
             end
         end
         gfx.GlobalCompositeOperation(gfx.BLEND_OP_SOURCE_OVER)
-        
+
         -- Undo those modifications
         gfx.Restore();
     end
@@ -455,7 +448,7 @@ function draw_stat(x, y, w, h, name, value, format, r, g, b)
     gfx.LineTo(w, h) -- only defines the line, does NOT draw it yet
 
     -- If a color is provided, set it
-    if r then gfx.StrokeColor(r, g, b) 
+    if r then gfx.StrokeColor(r, g, b)
     -- otherwise, default to a light grey
     else gfx.StrokeColor(200, 200, 200) end
 
@@ -506,14 +499,14 @@ function draw_song_info(deltaTime)
     -- Reset some text related stuff that was changed in draw_state
     gfx.TextAlign(gfx.TEXT_ALIGN_LEFT)
     gfx.FontSize(30)
-    
+
     gfx.FillColor(255, 255, 255)
 
     local textX = jacketWidth + 10
     local titleWidth = songInfoWidth - jacketWidth - 20
     local x1, y1, x2, y2 = gfx.TextBounds(0, 0, gameplay.title)
     local textscale = math.min(titleWidth / x2, 1)
-    
+
     gfx.Save()
     do  -- Draw the song title, scaled to fit as best as possible
         gfx.Translate(textX, 30)
@@ -620,7 +613,7 @@ function draw_gauge(deltaTime)
 
 	--draw gauge % label
 	posx = posx / scale
-	posx = posx + (100 * 0.35) 
+	posx = posx + (100 * 0.35)
 	height = 880 * 0.35
 	posy = posy / scale
 	if portrait then
@@ -687,8 +680,8 @@ function draw_alerts(deltaTime)
         gfx.Save()
         local posx = desw / 2 - 350
         local posy = desh * critLinePos[1] - 135
-        if portrait then 
-            posy = desh * critLinePos[2] - 135 
+        if portrait then
+            posy = desh * critLinePos[2] - 135
             posx = 65
         end
         gfx.Translate(posx,posy)
@@ -714,8 +707,8 @@ function draw_alerts(deltaTime)
         gfx.Save()
         local posx = desw / 2 + 350
         local posy = desh * critLinePos[1] - 135
-        if portrait then 
-            posy = desh * critLinePos[2] - 135 
+        if portrait then
+            posy = desh * critLinePos[2] - 135
             posx = desw - 65
         end
         gfx.Translate(posx,posy)
