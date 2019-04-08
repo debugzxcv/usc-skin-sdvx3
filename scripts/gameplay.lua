@@ -600,28 +600,28 @@ end
 -- -------------------------------------------------------------------------- --
 -- draw_gauge:                                                                --
 function draw_gauge(deltaTime)
-    local height = 1024 * scale * 0.35
-    local width = 512 * scale * 0.35
+    local height = 1024 * scale * (portrait and 0.6 or 0.35)
+    local width = 512 * scale * (portrait and 0.6 or 0.35)
     local posy = resy / 2 - height / 2
-    local posx = resx - width * (1 - math.max(introTimer - 1, 0))
+    local posx = resx - width
     if portrait then
         width = width * 0.8
         height = height * 0.8
-        posy = posy - 30
-        posx = resx - width * (1 - math.max(introTimer - 1, 0))
+        posy = posy + 20
+        posx = resx - width
     end
     gfx.DrawGauge(gameplay.gauge, posx, posy, width, height, deltaTime)
 
 	--draw gauge % label
 	posx = posx / scale
-	posx = posx + (100 * 0.35)
-	height = 880 * 0.35
+	posx = posx + (100 * 0.7)
+	height = 880 * 0.42
 	posy = posy / scale
 	if portrait then
 		height = height * 0.8;
 	end
 
-	posy = posy + (70 * 0.35) + height - height * gameplay.gauge
+	posy = posy + (70 * 0.6) + height - height * gameplay.gauge
 	gfx.BeginPath()
 	gfx.Rect(posx-35, posy-10, 40, 20)
 	gfx.FillColor(0,0,0,200)
