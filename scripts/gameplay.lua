@@ -125,6 +125,8 @@ local critConsole = gfx.CreateSkinImage("crit_console.png", 0)
 local laserCursor = gfx.CreateSkinImage("pointer.png", 0)
 local laserCursorOverlay = gfx.CreateSkinImage("pointer_overlay.png", 0)
 local scoreBack = gfx.CreateSkinImage("score_back.png", 0)
+local scoreEarly = gfx.CreateSkinImage("score_early.png", 0)
+local scoreLate = gfx.CreateSkinImage("score_late.png", 0)
 local comboBottom = gfx.CreateSkinImage("chain/chain.png", 0)
 local comboDigits = {}
 for i = 0, 10 do
@@ -684,18 +686,18 @@ function draw_earlate(deltaTime)
     earlateTimer = math.max(earlateTimer - deltaTime,0)
     if earlateTimer == 0 then return nil end
     local alpha = math.floor(earlateTimer * 20) % 2
-    alpha = alpha * 200 + 55
+    alpha = (alpha * 100 + 155) / 255
     gfx.BeginPath()
-    gfx.FontSize(35)
-    gfx.TextAlign(gfx.TEXT_ALIGN_CENTER, gfx.TEXT_ALIGN_MIDDLE)
-    local ypos = desh * critLinePos[1] - 150
-    if portrait then ypos = desh * critLinePos[2] - 150 end
+
+    local xpos = desw / 2
+    local ypos = desh * critLinePos[1] - 450
+    if portrait then ypos = desh * critLinePos[2] - 450 end
     if late then
-        gfx.FillColor(0,255,255, alpha)
-        gfx.Text("LATE", desw / 2, ypos)
+        tw, th = gfx.ImageSize(scoreLate)
+        gfx.ImageRect(xpos - tw / 2, ypos - th / 2, tw, th, scoreLate, alpha, 0)
     else
-        gfx.FillColor(255,0,255, alpha)
-        gfx.Text("EARLY", desw / 2, ypos)
+        tw, th = gfx.ImageSize(scoreEarly)
+        gfx.ImageRect(xpos - tw / 2, ypos - th / 2, tw, th, scoreEarly, alpha, 0)
     end
 end
 -- -------------------------------------------------------------------------- --
