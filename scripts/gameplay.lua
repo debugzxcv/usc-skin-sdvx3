@@ -124,6 +124,7 @@ local critBar = gfx.CreateSkinImage("crit_bar.png", 0)
 local critConsole = gfx.CreateSkinImage("crit_console.png", 0)
 local laserCursor = gfx.CreateSkinImage("pointer.png", 0)
 local laserCursorOverlay = gfx.CreateSkinImage("pointer_overlay.png", 0)
+local scoreBack = gfx.CreateSkinImage("score_back.png", 0)
 
 local ioConsoleDetails = {
     gfx.CreateSkinImage("console/detail_left.png", 0),
@@ -579,21 +580,19 @@ end
 -- -------------------------------------------------------------------------- --
 -- draw_score:                                                                --
 function draw_score(deltaTime)
+    tw, th = gfx.ImageSize(scoreBack)
+    gfx.FillColor(255, 255, 255)
     gfx.BeginPath()
+    gfx.ImageRect(desw - tw + 12, portrait and -110 or 0, tw, th, scoreBack, 1, 0)
+
     gfx.LoadSkinFont("NovaMono.ttf")
     gfx.BeginPath()
-    gfx.RoundedRectVarying(desw - 210, 5, 220, 62, 0, 0, 0, 20)
-    gfx.FillColor(20, 20, 20)
-    gfx.StrokeColor(0, 128, 255)
-    gfx.StrokeWidth(2)
-    gfx.Fill()
-    gfx.Stroke()
     gfx.Translate(-5, 5) -- upper right margin
     gfx.FillColor(255, 255, 255)
     gfx.TextAlign(gfx.TEXT_ALIGN_RIGHT + gfx.TEXT_ALIGN_TOP)
     gfx.FontSize(60)
-    gfx.Text(string.format("%08d", score), desw, 0)
-    draw_best_diff(deltaTime, desw, 66)
+    gfx.Text(string.format("%08d", score), desw, portrait and -86 or 24)
+    -- draw_best_diff(deltaTime, desw, 66)
     gfx.Translate(5, -5) -- undo margin
 end
 -- -------------------------------------------------------------------------- --
