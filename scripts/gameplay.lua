@@ -125,6 +125,11 @@ local critConsole = gfx.CreateSkinImage("crit_console.png", 0)
 local laserCursor = gfx.CreateSkinImage("pointer.png", 0)
 local laserCursorOverlay = gfx.CreateSkinImage("pointer_overlay.png", 0)
 local scoreBack = gfx.CreateSkinImage("score_back.png", 0)
+local comboBottom = gfx.CreateSkinImage("chain/chain.png", 0)
+local comboDigits = {}
+for i = 0, 10 do
+    comboDigits[i + 1] = gfx.CreateSkinImage(string.format("chain/%d.png", i), 0)
+end
 
 local ioConsoleDetails = {
     gfx.CreateSkinImage("console/detail_left.png", 0),
@@ -152,6 +157,7 @@ local alertTimers = {-2,-2}
 
 local earlateTimer = 0
 local critAnimTimer = 0
+local comboTimer = 0
 
 local consoleAnimSpeed = 10
 local consoleAnimTimers = { 0, 0, 0, 0, 0, 0, 0, 0 }
@@ -161,7 +167,6 @@ local score = 0
 local combo = 0
 local jacket = nil
 local critLinePos = { 0.95, 0.75 };
-local comboScale = 1.0
 local late = false
 local diffNames = {"NOV", "ADV", "EXH", "INF"}
 local clearTexts = {"TRACK FAILED", "TRACK COMPLETE", "TRACK COMPLETE", "FULL COMBO", "PERFECT" }
@@ -635,22 +640,43 @@ end
 -- draw_combo:                                                                --
 function draw_combo(deltaTime)
     if combo == 0 then return end
+    comboTimer = comboTimer + deltaTime
     local posx = desw / 2
     local posy = desh * critLinePos[1] - 100
     if portrait then posy = desh * critLinePos[2] - 150 end
-    gfx.BeginPath()
-    gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_MIDDLE)
     if gameplay.comboState == 2 then
-        gfx.FillColor(100,255,0) --puc
+        gfx.FillColor(255,200,0) --puc
     elseif gameplay.comboState == 1 then
         gfx.FillColor(255,200,0) --uc
     else
         gfx.FillColor(255,255,255) --regular
     end
-    gfx.LoadSkinFont("NovaMono.ttf")
-    gfx.FontSize(70 * math.max(comboScale, 1))
-    comboScale = comboScale - deltaTime * 3
-    gfx.Text(tostring(combo), posx, posy)
+    local alpha = math.floor(comboTimer * 20) % 2
+    alpha = (alpha * 100 + 155) / 255
+
+    -- \_ chain _/
+    tw, th = gfx.ImageSize(comboBottom)
+    gfx.BeginPath()
+    gfx.ImageRect(posx - tw / 2, posy - th / 2, tw, th, comboBottom, alpha, 0)
+
+    tw, th = gfx.ImageSize(comboDigits[1])
+    posy = posy - th
+
+    local digit = combo % 10
+    gfx.BeginPath()
+    gfx.ImageRect(posx + tw, posy - th / 2, tw, th, comboDigits[digit + 1], alpha, 0)
+
+    digit = math.floor(combo / 10) % 10
+    gfx.BeginPath()
+    gfx.ImageRect(posx, posy - th / 2, tw, th, comboDigits[digit + 1], alpha, 0)
+
+    digit = math.floor(combo / 100) % 10
+    gfx.BeginPath()
+    gfx.ImageRect(posx - tw, posy - th / 2, tw, th, comboDigits[digit + 1], alpha, 0)
+
+    digit = math.floor(combo / 1000) % 10
+    gfx.BeginPath()
+    gfx.ImageRect(posx - tw * 2, posy - th / 2, tw, th, comboDigits[digit + 1], alpha, 0)
 end
 -- -------------------------------------------------------------------------- --
 -- draw_earlate:                                                              --
@@ -768,7 +794,6 @@ end
 -- update_combo:                                                              --
 function update_combo(newCombo)
     combo = newCombo
-    comboScale = 1.5
 end
 -- -------------------------------------------------------------------------- --
 -- near_hit:                                                                  --
