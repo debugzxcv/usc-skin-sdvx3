@@ -103,6 +103,32 @@ function gfx.FillLaserColor(index, alpha)
     gfx.FillColor(r, g, b, alpha)
 end
 -- -------------------------------------------------------------------------- --
+function load_number_image(path)
+    local images = {}
+    for i = 0, 9 do
+        images[i + 1] = gfx.CreateSkinImage(string.format("%s/%d.png", path, i), 0)
+    end
+    return images
+end
+-- -------------------------------------------------------------------------- --
+function draw_number(x, y, alpha, num, digits, images, is_dim)
+    local tw, th = gfx.ImageSize(images[1])
+    x = x + (tw * (digits - 1)) / 2
+    y = y - th / 2
+    for i = 1, digits do
+        local mul = 10 ^ (i - 1)
+        local digit = math.floor(num / mul) % 10
+        local a = alpha
+        if is_dim and num < mul then
+            a = 0.2
+        end
+        gfx.BeginPath()
+        gfx.ImageRect(x, y, tw, th, images[digit + 1], a, 0)
+        x = x - tw
+    end
+end
+
+-- -------------------------------------------------------------------------- --
 -- -------------------------------------------------------------------------- --
 -- -------------------------------------------------------------------------- --
 --                  The actual gameplay script starts here!                   --
@@ -124,14 +150,10 @@ local critBar = gfx.CreateSkinImage("crit_bar.png", 0)
 local critConsole = gfx.CreateSkinImage("crit_console.png", 0)
 local laserCursor = gfx.CreateSkinImage("pointer.png", 0)
 local laserCursorOverlay = gfx.CreateSkinImage("pointer_overlay.png", 0)
-local scoreBack = gfx.CreateSkinImage("score_back.png", 0)
 local scoreEarly = gfx.CreateSkinImage("score_early.png", 0)
 local scoreLate = gfx.CreateSkinImage("score_late.png", 0)
 local comboBottom = gfx.CreateSkinImage("chain/chain.png", 0)
-local comboDigits = {}
-for i = 0, 10 do
-    comboDigits[i + 1] = gfx.CreateSkinImage(string.format("chain/%d.png", i), 0)
-end
+local comboDigits = load_number_image("chain")
 
 local ioConsoleDetails = {
     gfx.CreateSkinImage("console/detail_left.png", 0),
@@ -588,11 +610,17 @@ function draw_best_diff(deltaTime, x, y)
 end
 -- -------------------------------------------------------------------------- --
 -- draw_score:                                                                --
+local scoreBack = gfx.CreateSkinImage("score_back.png", 0)
+local scoreNumberLarge = load_number_image("score_l")
+
 function draw_score(deltaTime)
     tw, th = gfx.ImageSize(scoreBack)
     gfx.FillColor(255, 255, 255)
     gfx.BeginPath()
     gfx.ImageRect(desw - tw + 12, portrait and -110 or 0, tw, th, scoreBack, 1, 0)
+
+    gfx.FillColor(255, 255, 255)
+    draw_number(desw - 188, portrait and -46 or 64, 1.0, math.floor(score / 1000), 5, scoreNumberLarge, false)
 
     gfx.LoadSkinFont("NovaMono.ttf")
     gfx.BeginPath()
