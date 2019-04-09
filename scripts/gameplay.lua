@@ -612,6 +612,7 @@ end
 -- draw_score:                                                                --
 local scoreBack = gfx.CreateSkinImage("score_back.png", 0)
 local scoreNumberLarge = load_number_image("score_l")
+local scoreNumberSmall = load_number_image("score_s")
 
 function draw_score(deltaTime)
     tw, th = gfx.ImageSize(scoreBack)
@@ -621,16 +622,9 @@ function draw_score(deltaTime)
 
     gfx.FillColor(255, 255, 255)
     draw_number(desw - 188, portrait and -46 or 64, 1.0, math.floor(score / 1000), 5, scoreNumberLarge, false)
+    draw_number(desw - 56, portrait and -42 or 68, 1.0, score, 3, scoreNumberSmall, false)
 
-    gfx.LoadSkinFont("NovaMono.ttf")
-    gfx.BeginPath()
-    gfx.Translate(-5, 5) -- upper right margin
-    gfx.FillColor(255, 255, 255)
-    gfx.TextAlign(gfx.TEXT_ALIGN_RIGHT + gfx.TEXT_ALIGN_TOP)
-    gfx.FontSize(60)
-    gfx.Text(string.format("%08d", score), desw, portrait and -86 or 24)
     -- draw_best_diff(deltaTime, desw, 66)
-    gfx.Translate(5, -5) -- undo margin
 end
 -- -------------------------------------------------------------------------- --
 -- draw_gauge:                                                                --
