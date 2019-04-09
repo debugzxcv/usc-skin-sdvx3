@@ -670,15 +670,15 @@ function draw_combo(deltaTime)
 
     digit = math.floor(combo / 10) % 10
     gfx.BeginPath()
-    gfx.ImageRect(posx, posy - th / 2, tw, th, comboDigits[digit + 1], alpha, 0)
+    gfx.ImageRect(posx, posy - th / 2, tw, th, comboDigits[digit + 1], combo >= 10 and alpha or 0.2, 0)
 
     digit = math.floor(combo / 100) % 10
     gfx.BeginPath()
-    gfx.ImageRect(posx - tw, posy - th / 2, tw, th, comboDigits[digit + 1], alpha, 0)
+    gfx.ImageRect(posx - tw, posy - th / 2, tw, th, comboDigits[digit + 1], combo >= 100 and alpha or 0.2, 0)
 
     digit = math.floor(combo / 1000) % 10
     gfx.BeginPath()
-    gfx.ImageRect(posx - tw * 2, posy - th / 2, tw, th, comboDigits[digit + 1], alpha, 0)
+    gfx.ImageRect(posx - tw * 2, posy - th / 2, tw, th, comboDigits[digit + 1], combo >= 1000 and alpha or 0.2, 0)
 end
 -- -------------------------------------------------------------------------- --
 -- draw_earlate:                                                              --
