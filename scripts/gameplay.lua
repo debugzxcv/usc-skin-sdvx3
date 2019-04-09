@@ -497,88 +497,69 @@ end
 -- draw_song_info:                                                            --
 -- Draws current song information at the top left of the screen.              --
 -- This function expects no graphics transform except the design scale.       --
+local songBack = gfx.CreateSkinImage("song_back.png", 0)
+
 function draw_song_info(deltaTime)
-    local songInfoWidth = 400
-    local jacketWidth = 100
+    local jacketWidth = 75
+
     -- Check to see if there's a jacket to draw, and attempt to load one if not
     if jacket == nil or jacket == jacketFallback then
         jacket = gfx.LoadImageJob(gameplay.jacketPath, jacketFallback)
     end
-
     gfx.Save()
-
-    -- Add a small margin at the edge
-    gfx.Translate(5,5)
-    -- There's less screen space in portrait, the playable area is effectively a square
-    -- We scale down to take up less space
-    if portrait then gfx.Scale(0.7, 0.7) end
 
     -- Ensure the font has been loaded
     gfx.LoadSkinFont("segoeui.ttf")
 
-    -- Draw the background, a simple grey box
-    gfx.FillColor(20, 20, 20, 200)
-    gfx.DrawRect(RECT_FILL, 0, 0, songInfoWidth, 100)
+    -- Draw the background
+    tw, th = gfx.ImageSize(songBack)
+    gfx.BeginPath()
+    gfx.ImageRect(-20, -110, tw, th, songBack, 1, 0)
+
     -- Draw the jacket
-    gfx.FillColor(255, 255, 255)
-    gfx.DrawRect(jacket, 0, 0, jacketWidth, jacketWidth)
-    -- Draw a background for the following level stat
-    gfx.FillColor(0, 0, 0, 200)
-    gfx.DrawRect(RECT_FILL, 0, 85, 60, 15)
+    gfx.BeginPath()
+    gfx.ImageRect(22, -85, jacketWidth, jacketWidth, jacket, 1, 0)
+
     -- Level Name : Level Number
-    gfx.FillColor(255, 255, 255)
-    draw_stat(0, 85, 55, 15, diffNames[gameplay.difficulty + 1], gameplay.level, "%02d")
-    -- Reset some text related stuff that was changed in draw_state
-    gfx.TextAlign(gfx.TEXT_ALIGN_LEFT)
-    gfx.FontSize(30)
+    gfx.BeginPath()
+    gfx.FillColor(255,255,255)
+    draw_stat(22, -8, 75, 13, diffNames[gameplay.difficulty + 1], gameplay.level, "%02d")
 
-    gfx.FillColor(255, 255, 255)
-
-    local textX = jacketWidth + 10
-    local titleWidth = songInfoWidth - jacketWidth - 20
-    local x1, y1, x2, y2 = gfx.TextBounds(0, 0, gameplay.title)
-    local textscale = math.min(titleWidth / x2, 1)
-
+    -- Draw the song title, scaled to fit as best as possible
+    local title = gameplay.title .. " / " .. gameplay.artist
+    local titleWidth = 520
     gfx.Save()
-    do  -- Draw the song title, scaled to fit as best as possible
-        gfx.Translate(textX, 30)
-        gfx.Scale(textscale, textscale)
-        gfx.Text(gameplay.title, 0, 0)
-    end
-    gfx.Restore()
-
-    x1,y1,x2,y2 = gfx.TextBounds(0,0,gameplay.artist)
-    textscale = math.min(titleWidth / x2, 1)
-
-    gfx.Save()
-    do  -- Draw the song artist, scaled to fit as best as possible
-        gfx.Translate(textX, 60)
-        gfx.Scale(textscale, textscale)
-        gfx.Text(gameplay.artist, 0, 0)
-    end
+    gfx.TextAlign(gfx.TEXT_ALIGN_CENTER)
+    gfx.FontSize(16)
+    x1, y1, x2, y2 = gfx.TextBounds(0, 0, title)
+    local textScale = math.min(titleWidth / x2, 1)
+    gfx.Translate(360, -290)
+    gfx.Scale(textScale, 1)
+    gfx.Text(title, 0, 0)
     gfx.Restore()
 
     -- Draw the BPM
-    gfx.FontSize(20)
-    gfx.Text(string.format("BPM: %.1f", gameplay.bpm), textX, 85)
+    gfx.FillColor(255,255,255)
+    gfx.FontSize(16)
+    gfx.Text(string.format("%.0f", gameplay.bpm), 208, -9)
+
+    gfx.Text(string.format("%.1f", gameplay.hispeed), 208, 9)
 
     -- Fill the progress bar
-    gfx.FillColor(0, 150, 255)
-    gfx.DrawRect(RECT_FILL, jacketWidth, jacketWidth - 10, (songInfoWidth - jacketWidth) * gameplay.progress, 10)
+    gfx.BeginPath()
+    gfx.FillColor(242, 146, 54)
+    gfx.Rect(128, -31, 140 * gameplay.progress, 3)
+    gfx.Fill()
 
     -- When the player is holding Start, the hispeed can be changed
     -- Shows the current hispeed values
     if game.GetButton(game.BUTTON_STA) then
-        gfx.FillColor(20, 20, 20, 200);
-        gfx.DrawRect(RECT_FILL, 100, 100, songInfoWidth - 100, 20)
-
-        gfx.FillColor(255, 255, 255)
-        gfx.Text(string.format("HiSpeed: %.0f x %.1f = %.0f",
-                gameplay.bpm, gameplay.hispeed, gameplay.bpm * gameplay.hispeed),
-                textX, 115)
+      gfx.BeginPath()
+      gfx.FillColor(255,255,255)
+      gfx.Text(string.format("HiSpeed: %.0f x %.1f = %.0f",
+      gameplay.bpm, gameplay.hispeed, gameplay.bpm * gameplay.hispeed),
+      0, 115)
     end
-
-    -- aaaand, scene!
     gfx.Restore()
 end
 -- -------------------------------------------------------------------------- --
