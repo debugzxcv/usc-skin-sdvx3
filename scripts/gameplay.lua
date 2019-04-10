@@ -154,6 +154,7 @@ local scoreEarly = gfx.CreateSkinImage("score_early.png", 0)
 local scoreLate = gfx.CreateSkinImage("score_late.png", 0)
 local comboBottom = gfx.CreateSkinImage("chain/chain.png", 0)
 local comboDigits = load_number_image("chain")
+local numberImages = load_number_image("number")
 
 local ioConsoleDetails = {
     gfx.CreateSkinImage("console/detail_left.png", 0),
@@ -540,9 +541,11 @@ function draw_song_info(deltaTime)
 
     -- Draw the BPM
     gfx.FillColor(255,255,255)
-    gfx.FontSize(16)
-    gfx.Text(string.format("%.0f", gameplay.bpm), 208, -9)
+    -- gfx.Text(string.format("%.0f", gameplay.bpm), 208, -9)
+    draw_number(220, -14, 1.0, gameplay.bpm, 3, numberImages, false)
 
+    -- Draw the hi-speed
+    gfx.FontSize(16)
     gfx.Text(string.format("%.1f", gameplay.hispeed), 208, 9)
 
     -- Fill the progress bar
