@@ -612,6 +612,11 @@ function draw_score(deltaTime)
 end
 -- -------------------------------------------------------------------------- --
 -- draw_gauge:                                                                --
+gfx.SetGaugeColor(0,  47, 244, 255) --Normal gauge fail
+gfx.SetGaugeColor(1, 252,  76, 171) --Normal gauge clear
+gfx.SetGaugeColor(2, 255, 255, 255) --Hard gauge low (<30%)
+gfx.SetGaugeColor(3, 255, 255, 255) --Hard gauge high (>30%)
+
 function draw_gauge(deltaTime)
     local height = 1024 * scale * (portrait and 0.6 or 0.35)
     local width = 512 * scale * (portrait and 0.6 or 0.35)
