@@ -509,6 +509,10 @@ function draw_song_info(deltaTime)
     end
     gfx.Save()
 
+    if not portrait then
+        gfx.Translate(0, 112)
+    end
+
     -- Ensure the font has been loaded
     gfx.LoadSkinFont("segoeui.ttf")
 
