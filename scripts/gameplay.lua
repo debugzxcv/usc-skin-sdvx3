@@ -193,7 +193,6 @@ local combo = 0
 local jacket = nil
 local critLinePos = { 0.95, 0.75 };
 local late = false
-local diffNames = {"NOV", "ADV", "EXH", "INF"}
 local clearTexts = {"TRACK FAILED", "TRACK COMPLETE", "TRACK COMPLETE", "FULL COMBO", "PERFECT" }
 -- -------------------------------------------------------------------------- --
 -- ResetLayoutInformation:                                                    --
@@ -499,6 +498,12 @@ end
 -- Draws current song information at the top left of the screen.              --
 -- This function expects no graphics transform except the design scale.       --
 local songBack = gfx.CreateSkinImage("song_back.png", 0)
+local diffImages = {
+    gfx.CreateSkinImage("diff/novice.png", 0),
+    gfx.CreateSkinImage("diff/advanced.png", 0),
+    gfx.CreateSkinImage("diff/exhaust.png", 0),
+    gfx.CreateSkinImage("diff/gravity.png", 0)
+}
 
 function draw_song_info(deltaTime)
     local jacketWidth = 75
@@ -525,10 +530,14 @@ function draw_song_info(deltaTime)
     gfx.BeginPath()
     gfx.ImageRect(22, -85, jacketWidth, jacketWidth, jacket, 1, 0)
 
-    -- Level Name : Level Number
-    gfx.BeginPath()
+    -- Draw level name
     gfx.FillColor(255,255,255)
-    draw_stat(22, -8, 75, 13, diffNames[gameplay.difficulty + 1], gameplay.level, "%02d")
+    gfx.BeginPath()
+    tw, th = gfx.ImageSize(diffImages[gameplay.difficulty + 1])
+    gfx.ImageRect(22, -4, tw, th, diffImages[gameplay.difficulty + 1], 1, 0)
+
+    -- Draw level number
+    draw_number(78, 0, 1.0, gameplay.level, 2, numberImages, false)
 
     -- Draw the song title, scaled to fit as best as possible
     local title = gameplay.title .. " / " .. gameplay.artist
@@ -546,7 +555,7 @@ function draw_song_info(deltaTime)
     -- Draw the BPM
     gfx.FillColor(255,255,255)
     -- gfx.Text(string.format("%.0f", gameplay.bpm), 208, -9)
-    draw_number(220, -14, 1.0, gameplay.bpm, 3, numberImages, false)
+    draw_number(224, -14, 1.0, gameplay.bpm, 3, numberImages, false)
 
     -- Draw the hi-speed
     gfx.FontSize(16)
