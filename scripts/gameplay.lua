@@ -554,8 +554,7 @@ function draw_song_info(deltaTime)
 
     -- Draw the BPM
     gfx.FillColor(255,255,255)
-    -- gfx.Text(string.format("%.0f", gameplay.bpm), 208, -9)
-    draw_number(224, -14, 1.0, gameplay.bpm, 3, numberImages, false)
+    draw_number(220, -15, 1.0, gameplay.bpm, 3, numberImages, false)
 
     -- Draw the hi-speed
     gfx.FontSize(16)
@@ -625,6 +624,7 @@ function draw_score(deltaTime)
 end
 -- -------------------------------------------------------------------------- --
 -- draw_gauge:                                                                --
+local gaugeNumBack = gfx.CreateSkinImage("gauge_num_back.png", 0)
 gfx.SetGaugeColor(0,  47, 244, 255) --Normal gauge fail
 gfx.SetGaugeColor(1, 252,  76, 171) --Normal gauge clear
 gfx.SetGaugeColor(2, 255, 255, 255) --Hard gauge low (<30%)
@@ -652,15 +652,17 @@ function draw_gauge(deltaTime)
 		height = height * 0.8;
 	end
 
-	posy = posy + (70 * 0.6) + height - height * gameplay.gauge
-	gfx.BeginPath()
-	gfx.Rect(posx-35, posy-10, 40, 20)
-	gfx.FillColor(0,0,0,200)
-	gfx.Fill()
+    local tw, th = gfx.ImageSize(gaugeNumBack)
+    posy = posy + (65 * 0.6) + height - height * gameplay.gauge
+    gfx.BeginPath()
+    gfx.ImageRect(posx - 44, posy - 10, tw, th, gaugeNumBack, 1, 0)
+	-- gfx.Rect(posx-35, posy-10, 40, 20)
+	-- gfx.FillColor(0,0,0,200)
+	-- gfx.Fill()
 	gfx.FillColor(255,255,255)
 	gfx.TextAlign(gfx.TEXT_ALIGN_RIGHT + gfx.TEXT_ALIGN_MIDDLE)
-	gfx.FontSize(20)
-	gfx.Text(string.format("%d%%", math.floor(gameplay.gauge * 100)), posx, posy )
+	gfx.FontSize(18)
+	gfx.Text(string.format("%d", math.floor(gameplay.gauge * 100)), posx, posy + 4)
 end
 -- -------------------------------------------------------------------------- --
 -- draw_combo:                                                                --
