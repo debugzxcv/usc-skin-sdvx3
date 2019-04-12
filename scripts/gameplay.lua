@@ -120,7 +120,7 @@ function draw_number(x, y, alpha, num, digits, images, is_dim)
         local digit = math.floor(num / mul) % 10
         local a = alpha
         if is_dim and num < mul then
-            a = 0.2
+            a = 0
         end
         gfx.BeginPath()
         gfx.ImageRect(x, y, tw, th, images[digit + 1], a, 0)
@@ -631,38 +631,37 @@ gfx.SetGaugeColor(2, 255, 255, 255) --Hard gauge low (<30%)
 gfx.SetGaugeColor(3, 255, 255, 255) --Hard gauge high (>30%)
 
 function draw_gauge(deltaTime)
-    local height = 1024 * scale * (portrait and 0.6 or 0.35)
-    local width = 512 * scale * (portrait and 0.6 or 0.35)
-    local posy = resy / 2 - height / 2
+    local height = 1024 * scale * 0.5
+    local width = 512 * scale * 0.5
+    local posy = resy / 2 - height / 2 + 60
     local posx = resx - width
     if portrait then
-        width = width * 0.8
-        height = height * 0.8
-        posy = posy + 20
+        posy = posy - 90
         posx = resx - width
     end
     gfx.DrawGauge(gameplay.gauge, posx, posy, width, height, deltaTime)
 
 	--draw gauge % label
 	posx = posx / scale
-	posx = posx + (100 * 0.7)
-	height = 880 * 0.42
+	posx = posx + (135 * 0.5)
+    -- 630 = 0% position
+    height = 630 * 0.5
 	posy = posy / scale
-	if portrait then
-		height = height * 0.8;
-	end
 
     local tw, th = gfx.ImageSize(gaugeNumBack)
-    posy = posy + (65 * 0.6) + height - height * gameplay.gauge
+    -- 80 = 100% position
+    posy = posy + (95 * 0.5) + height - height * gameplay.gauge
+    -- Draw the background
     gfx.BeginPath()
+    gfx.FillColor(255, 255, 255)
     gfx.ImageRect(posx - 44, posy - 10, tw, th, gaugeNumBack, 1, 0)
-	-- gfx.Rect(posx-35, posy-10, 40, 20)
-	-- gfx.FillColor(0,0,0,200)
-	-- gfx.Fill()
-	gfx.FillColor(255,255,255)
-	gfx.TextAlign(gfx.TEXT_ALIGN_RIGHT + gfx.TEXT_ALIGN_MIDDLE)
-	gfx.FontSize(18)
-	gfx.Text(string.format("%d", math.floor(gameplay.gauge * 100)), posx, posy + 4)
+
+    gfx.BeginPath()
+    gfx.FillColor(250, 228, 112)
+    draw_number(posx - 24, posy + 4, 1.0, math.floor(gameplay.gauge * 100), 3, numberImages, true)
+	-- gfx.TextAlign(gfx.TEXT_ALIGN_RIGHT + gfx.TEXT_ALIGN_MIDDLE)
+	-- gfx.FontSize(18)
+	-- gfx.Text(string.format("%d", math.floor(gameplay.gauge * 100)), posx, posy + 4)
 end
 -- -------------------------------------------------------------------------- --
 -- draw_combo:                                                                --
