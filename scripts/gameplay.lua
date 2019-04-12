@@ -152,8 +152,6 @@ local laserCursor = gfx.CreateSkinImage("pointer.png", 0)
 local laserCursorOverlay = gfx.CreateSkinImage("pointer_overlay.png", 0)
 local scoreEarly = gfx.CreateSkinImage("score_early.png", 0)
 local scoreLate = gfx.CreateSkinImage("score_late.png", 0)
-local comboBottom = gfx.CreateSkinImage("chain/chain.png", 0)
-local comboDigits = load_number_image("chain")
 local numberImages = load_number_image("number")
 
 local ioConsoleDetails = {
@@ -182,14 +180,12 @@ local alertTimers = {-2,-2}
 
 local earlateTimer = 0
 local critAnimTimer = 0
-local comboTimer = 0
 
 local consoleAnimSpeed = 10
 local consoleAnimTimers = { 0, 0, 0, 0, 0, 0, 0, 0 }
 -- -------------------------------------------------------------------------- --
 -- Miscelaneous, currently unsorted:                                          --
 local score = 0
-local combo = 0
 local jacket = nil
 local critLinePos = { 0.95, 0.75 };
 local late = false
@@ -666,6 +662,11 @@ function draw_gauge(deltaTime)
 end
 -- -------------------------------------------------------------------------- --
 -- draw_combo:                                                                --
+local comboBottom = gfx.CreateSkinImage("chain/chain.png", 0)
+local comboDigits = load_number_image("chain")
+local comboTimer = 0
+local combo = 0
+local maxCombo = 0
 function draw_combo(deltaTime)
     if combo == 0 then return end
     comboTimer = comboTimer + deltaTime
@@ -705,6 +706,10 @@ function draw_combo(deltaTime)
     digit = math.floor(combo / 1000) % 10
     gfx.BeginPath()
     gfx.ImageRect(posx - tw * 2, posy - th / 2, tw, th, comboDigits[digit + 1], combo >= 1000 and alpha or 0.2, 0)
+
+    -- Draw max combo
+    gfx.FillColor(255, 255, 255)
+    draw_number(desw - 222, portrait and 315 or 110, 1.0, maxCombo, 4, numberImages, false)
 end
 -- -------------------------------------------------------------------------- --
 -- draw_earlate:                                                              --
@@ -832,6 +837,9 @@ end
 -- update_combo:                                                              --
 function update_combo(newCombo)
     combo = newCombo
+    if combo > maxCombo then
+        maxCombo = combo
+    end
 end
 -- -------------------------------------------------------------------------- --
 -- near_hit:                                                                  --
