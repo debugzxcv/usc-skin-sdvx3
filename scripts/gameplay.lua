@@ -234,6 +234,7 @@ function render(deltaTime)
     draw_score(deltaTime)
     -- gfx.Translate(0, -yshift + 150 * math.max(introTimer - 1, 0))
     gfx.Translate(0, -yshift)
+    draw_status(deltaTime)
     draw_gauge(deltaTime)
     draw_earlate(deltaTime)
     draw_combo(deltaTime)
@@ -785,6 +786,16 @@ function draw_alerts(deltaTime)
         gfx.Restore()
     end
 end
+-- -------------------------------------------------------------------------- --
+-- draw_status:                                                               --
+local statusBack = gfx.CreateSkinImage("status_back.png", 0)
+function draw_status(deltaTime)
+    -- Draw the background
+    tw, th = gfx.ImageSize(statusBack)
+    gfx.BeginPath()
+    gfx.ImageRect(0, desh / 2 - th / 2, tw, th, statusBack, 1, 0)
+end
+
 -- -------------------------------------------------------------------------- --
 -- render_intro:                                                              --
 function render_intro(deltaTime)
