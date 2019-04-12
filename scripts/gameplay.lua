@@ -495,6 +495,7 @@ end
 -- Draws current song information at the top left of the screen.              --
 -- This function expects no graphics transform except the design scale.       --
 local songBack = gfx.CreateSkinImage("song_back.png", 0)
+local numberDot = gfx.CreateSkinImage("number/dot.png", 0)
 local diffImages = {
     gfx.CreateSkinImage("diff/novice.png", 0),
     gfx.CreateSkinImage("diff/advanced.png", 0),
@@ -555,7 +556,12 @@ function draw_song_info(deltaTime)
 
     -- Draw the hi-speed
     gfx.FontSize(16)
-    gfx.Text(string.format("%.1f", gameplay.hispeed), 208, 9)
+    draw_number(213 + 20, 2, 1.0, math.floor((gameplay.hispeed + 0.05) * 10) % 10, 1, numberImages, false)
+    tw, th = gfx.ImageSize(numberDot)
+    gfx.BeginPath()
+    gfx.ImageRect(213 + 8, -4, tw, th, numberDot, 1, 0)
+    draw_number(213, 2, 1.0, math.floor(gameplay.hispeed), 1, numberImages, false)
+    -- gfx.Text(string.format("%.1f", gameplay.hispeed), 208, 9)
 
     -- Fill the progress bar
     gfx.BeginPath()
@@ -584,7 +590,7 @@ function draw_best_diff(deltaTime, x, y)
 
     -- Calculate the difference between current and best play
     local difference = score - gameplay.scoreReplays[1].currentScore
-    local prefix = "" -- used to properly display negative values
+    local prefix = " " -- used to properly display negative values
 
     gfx.BeginPath()
     gfx.FontSize(40)
@@ -599,6 +605,9 @@ function draw_best_diff(deltaTime, x, y)
 
     -- %08d formats a number to 8 characters
     -- This includes the minus sign, so we do that separately
+    gfx.LoadSkinFont("NovaMono.ttf")
+    gfx.FontSize(48)
+    gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP)
     gfx.Text(string.format("%s%08d", prefix, difference), x, y)
 end
 -- -------------------------------------------------------------------------- --
@@ -616,8 +625,6 @@ function draw_score(deltaTime)
     gfx.FillColor(255, 255, 255)
     draw_number(desw - 188, portrait and -46 or 64, 1.0, math.floor(score / 1000), 5, scoreNumberLarge, false)
     draw_number(desw - 56, portrait and -42 or 68, 1.0, score, 3, scoreNumberSmall, false)
-
-    -- draw_best_diff(deltaTime, desw, 66)
 end
 -- -------------------------------------------------------------------------- --
 -- draw_gauge:                                                                --
@@ -797,8 +804,11 @@ local statusBack = gfx.CreateSkinImage("status_back.png", 0)
 function draw_status(deltaTime)
     -- Draw the background
     tw, th = gfx.ImageSize(statusBack)
+    gfx.FillColor(255, 255, 255)
     gfx.BeginPath()
     gfx.ImageRect(0, desh / 2 - th / 2, tw, th, statusBack, 1, 0)
+
+    draw_best_diff(deltaTime, 40, desh / 2 - 10)
 end
 
 -- -------------------------------------------------------------------------- --
