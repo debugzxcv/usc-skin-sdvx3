@@ -415,7 +415,7 @@ function render_crit_overlay(deltaTime)
     end
 
     local cw, ch = gfx.ImageSize(laserCursor)
-    local cursorWidth = 40 * scale
+    local cursorWidth = 60 * scale
     local cursorHeight = cursorWidth * (ch / cw)
 
     -- draw each laser cursor
