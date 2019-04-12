@@ -521,6 +521,7 @@ function draw_song_info(deltaTime)
 
     -- Draw the background
     tw, th = gfx.ImageSize(songBack)
+    gfx.FillColor(255,255,255)
     gfx.BeginPath()
     gfx.ImageRect(-20, -110, tw, th, songBack, 1, 0)
 
@@ -529,7 +530,6 @@ function draw_song_info(deltaTime)
     gfx.ImageRect(22, -85, jacketWidth, jacketWidth, jacket, 1, 0)
 
     -- Draw level name
-    gfx.FillColor(255,255,255)
     gfx.BeginPath()
     tw, th = gfx.ImageSize(diffImages[gameplay.difficulty + 1])
     gfx.ImageRect(22, -4, tw, th, diffImages[gameplay.difficulty + 1], 1, 0)
