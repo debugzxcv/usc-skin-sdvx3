@@ -31,12 +31,45 @@ local medals = {
 }
 
 
+-- JacketCache class
+--------------------
+JacketCache = {}
+JacketCache.new = function()
+  local this = {
+    cache = {},
+    images = {
+      loading = Image.skin("song_select/jacket_loading.png", 0),
+    }
+  }
+
+  setmetatable(this, {__index = JacketCache})
+  return this
+end
+
+JacketCache.get = function(this, songId, diffId, path)
+  local songCache = this.cache[songId]
+  if not songCache then
+    songCache = {}
+    this.cache[songId] = songCache
+  end
+
+  local jacket = songCache[diffId]
+  if not jacket or jacket == this.images.loading.image then
+    jacket = gfx.LoadImageJob(path, this.images.loading.image)
+    songCache[diffId] = jacket
+  end
+  return jacket
+end
+
+
 -- SongData class
 -----------------
 SongData = {}
-SongData.new = function()
+SongData.new = function(jacketCache)
   local this = {
     selectedIndex = 1,
+    cache = {},
+    jacketCache = jacketCache,
     images = {
       dataBg = Image.skin("song_select/data_bg.png", 0)
     }
@@ -47,7 +80,59 @@ SongData.new = function()
 end
 
 SongData.render = function(this, deltaTime)
+  local song = songwheel.songs[this.selectedIndex]
+
+  -- Initialize song cache
+  if not this.cache[song.id] then
+    this.cache[song.id] = {}
+  end
+
+  -- Lookup difficulty
+  local diffIndex = 1
+  for i, v in ipairs(song.difficulties) do
+    if v.difficulty == this.selectedDifficulty then
+      diffIndex = i
+    end
+  end
+  local diff = song.difficulties[diffIndex]
+
+  -- Draw the background
   this.images.dataBg:draw(360, 176, 1, 0)
+
+  -- Draw the jacket
+  local jacket = this.jacketCache:get(song.id, diff.id, diff.jacketPath)
+  gfx.FillColor(255, 255, 255, 1)
+  gfx.BeginPath()
+  local js = 200
+  gfx.ImageRect(18, 58, js, js, jacket, 1, 0)
+
+  -- Draw the title
+  local title = this.cache[song.id]["title"]
+  if not title then
+    -- gfx.FontFace("rounded-mplus-1c-bold.ttf")
+    gfx.LoadSkinFont("rounded-mplus-1c-bold.ttf")
+    title = gfx.CreateLabel(song.title, 24, 0)
+    this.cache[song.id]["title"] = title
+  end
+  gfx.TextAlign(gfx.TEXT_ALIGN_LEFT or gfx.TEXT_ALIGN_BASELINE)
+  gfx.FillColor(55, 55, 55, 64)
+  gfx.DrawLabel(title, 247, 137, 400)
+  gfx.FillColor(55, 55, 55, 255)
+  gfx.DrawLabel(title, 245, 135, 400)
+
+  -- Draw the artist
+  local artist = this.cache[song.id]["artist"]
+  if not artist then
+    gfx.LoadSkinFont("rounded-mplus-1c-bold.ttf")
+    artist = gfx.CreateLabel(song.artist, 18, 0)
+    this.cache[song.id]["artist"] = artist
+  end
+  gfx.TextAlign(gfx.TEXT_ALIGN_LEFT or gfx.TEXT_ALIGN_BASELINE)
+  gfx.FillColor(55, 55, 55, 64)
+  gfx.DrawLabel(artist, 247, 172, 400)
+  gfx.FillColor(55, 55, 55, 255)
+  gfx.DrawLabel(artist, 245, 170, 400)
+
 end
 
 SongData.set_index = function(this, newIndex)
@@ -58,7 +143,7 @@ end
 -- SongTable class
 ------------------
 SongTable = {}
-SongTable.new = function()
+SongTable.new = function(jacketCache)
   local this = {
     cols = 3,
     rows = 3,
@@ -67,8 +152,8 @@ SongTable.new = function()
     rowOffset = 0, -- index of top-left song in page
     cursorPos = 0, -- cursor position in page [0..cols * rows)
     cache = {},
+    jacketCache = jacketCache,
     images = {
-      jacketLoading = Image.skin("song_select/jacket_loading.png", 0),
       scoreBg = Image.skin("song_select/score_bg.png", 0),
       cursor = Image.skin("song_select/cursor.png", 0),
       plates = {
@@ -129,7 +214,6 @@ SongTable.render_song = function(this, pos, songIndex)
   -- Initialize song cache
   if not this.cache[song.id] then
     this.cache[song.id] = {}
-    this.cache[song.id]["jacket"] = {}
   end
 
   -- Lookup difficulty
@@ -152,11 +236,7 @@ SongTable.render_song = function(this, pos, songIndex)
   this.images.plates[diff.difficulty + 1]:draw(x, y, 1, 0)
 
   -- Draw the jacket
-  local jacket = this.cache[song.id]["jacket"][diff.id]
-  if not jacket or jacket == this.images.jacketLoading.image then
-    jacket = gfx.LoadImageJob(diff.jacketPath, this.images.jacketLoading.image)
-    this.cache[song.id]["jacket"][diff.id] = jacket
-  end
+  local jacket = this.jacketCache:get(song.id, diff.id, diff.jacketPath)
   gfx.FillColor(255, 255, 255, 1)
   gfx.BeginPath()
   local js = 122
@@ -165,12 +245,14 @@ SongTable.render_song = function(this, pos, songIndex)
   -- Draw the title
   local title = this.cache[song.id]["title"]
   if not title then
-    gfx.FontFace("rounded-mplus-1c-bold.ttf")
-    gfx.TextAlign(gfx.TEXT_ALIGN_CENTER or gfx.TEXT_ALIGN_BASELINE)
+    -- gfx.FontFace("rounded-mplus-1c-bold.ttf")
+    gfx.LoadSkinFont("rounded-mplus-1c-bold.ttf")
     title = gfx.CreateLabel(song.title, 14, 0)
     this.cache[song.id]["title"] = title
   end
-  gfx.DrawLabel(title, x - 22, y + 63, 125)
+  gfx.BeginPath()
+  gfx.TextAlign(gfx.TEXT_ALIGN_CENTER or gfx.TEXT_ALIGN_BASELINE)
+  gfx.DrawLabel(title, x - 22, y + 53, 125)
 
   -- Draw the grade
   local gradeImage = noGrade
@@ -213,8 +295,9 @@ end
 -- main
 -------
 
-songData = SongData.new()
-songTable = SongTable.new()
+local jacketCache = JacketCache.new()
+local songData = SongData.new(jacketCache)
+local songTable = SongTable.new(jacketCache)
 
 -- Callback
 render = function(deltaTime)

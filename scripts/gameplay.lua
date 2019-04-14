@@ -142,7 +142,7 @@ local desw, desh -- The resolution of the deisign
 local scale -- the scale to get from design to actual units
 -- -------------------------------------------------------------------------- --
 -- All images used by the script:                                             --
-local jacketFallback = gfx.CreateSkinImage("song_select/loading.png", 0)
+local jacketFallback = gfx.CreateSkinImage("song_select/jacket_loading.png", 0)
 local bottomFill = gfx.CreateSkinImage("console/console.png", 0)
 local topFill = gfx.CreateSkinImage("fill_top.png", 0)
 local critAnim = gfx.CreateSkinImage("crit_anim.png", 0)
