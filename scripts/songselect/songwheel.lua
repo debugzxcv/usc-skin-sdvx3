@@ -4,6 +4,7 @@ gfx.LoadSkinFont("UDDigiKyokashoNP-B.ttf")
 gfx.LoadSkinFont("rounded-mplus-1c-bold.ttf")
 
 game.LoadSkinSample("cursor_song")
+game.LoadSkinSample("cursor_difficulty")
 
 local levelFont = ImageFont.new("font-level", "0123456789")
 local bpmFont = ImageFont.new("number", "0123456789.") -- FIXME: font-default
@@ -30,6 +31,21 @@ local medals = {
   Image.skin("song_select/medal/uc.png", 0),
   Image.skin("song_select/medal/puc.png", 0)
 }
+
+-- Lookup difficulty
+function lookup_difficulty(diffs, diff)
+  local diffIndex = nil
+  for i, v in ipairs(diffs) do
+    if v.difficulty + 1 == diff then
+      diffIndex = i
+    end
+  end
+  local difficulty = nil
+  if diffIndex ~= nil then
+    difficulty = diffs[diffIndex]
+  end
+  return difficulty
+end
 
 
 -- JacketCache class
@@ -69,10 +85,18 @@ SongData = {}
 SongData.new = function(jacketCache)
   local this = {
     selectedIndex = 1,
+    selectedDifficulty = 0,
     cache = {},
     jacketCache = jacketCache,
     images = {
-      dataBg = Image.skin("song_select/data_bg.png", 0)
+      dataBg = Image.skin("song_select/data_bg.png", 0),
+      none = Image.skin("song_select/level/none.png", 0),
+      difficulties = {
+        Image.skin("song_select/level/novice.png", 0),
+        Image.skin("song_select/level/advanced.png", 0),
+        Image.skin("song_select/level/exhaust.png", 0),
+        Image.skin("song_select/level/gravity.png", 0)
+      },
     }
   }
 
@@ -89,13 +113,8 @@ SongData.render = function(this, deltaTime)
   end
 
   -- Lookup difficulty
-  local diffIndex = 1
-  for i, v in ipairs(song.difficulties) do
-    if v.difficulty == this.selectedDifficulty then
-      diffIndex = i
-    end
-  end
-  local diff = song.difficulties[diffIndex]
+  local diff = lookup_difficulty(song.difficulties, this.selectedDifficulty)
+  if diff == nil then diff = song.difficulties[#song.difficulties] end
 
   -- Draw the background
   this.images.dataBg:draw(360, 176, 1, 0)
@@ -154,10 +173,30 @@ SongData.render = function(this, deltaTime)
   -- gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BASELINE)
   -- gfx.FillColor(255, 255, 255, 255)
   -- gfx.Text(song.bpm, 510, 73)
+
+  for i = 1, 4 do
+    local diff = lookup_difficulty(song.difficulties, i)
+    this:render_difficulty(i - 1, diff)
+  end
+end
+
+SongData.render_difficulty = function(this, index, diff)
+  local x = 344
+  local y = 280
+  if diff == nil then
+    this.images.none:draw(x + index * 96, y, 1, 0)
+    return
+  end
+
+  this.images.difficulties[diff.difficulty + 1]:draw(x + index * 96, y, 1, 0)
 end
 
 SongData.set_index = function(this, newIndex)
   this.selectedIndex = newIndex
+end
+
+SongData.set_difficulty = function(this, newDiff)
+  this.selectedDifficulty = newDiff
 end
 
 
@@ -221,6 +260,13 @@ SongTable.set_index = function(this, newIndex)
   this.selectedIndex = newIndex
 end
 
+SongTable.set_difficulty = function(this, newDiff)
+  if newDiff ~= this.selectedDifficulty then
+    game.PlaySample("cursor_difficulty")
+  end
+  this.selectedDifficulty = newDiff
+end
+
 SongTable.render = function(this, deltaTime)
   this:render_songs()
   this:render_cursor()
@@ -244,13 +290,8 @@ SongTable.render_song = function(this, pos, songIndex)
   end
 
   -- Lookup difficulty
-  local diffIndex = 1
-  for i, v in ipairs(song.difficulties) do
-    if v.difficulty == this.selectedDifficulty then
-      diffIndex = i
-    end
-  end
-  local diff = song.difficulties[diffIndex]
+  local diff = lookup_difficulty(song.difficulties, this.selectedDifficulty)
+  if diff == nil then diff = song.difficulties[#song.difficulties] end
 
   local col = pos % this.cols
   local row = math.floor(pos / this.cols)
@@ -353,4 +394,6 @@ end
 
 -- Callback
 set_diff = function(newDiff)
+  songData:set_difficulty(newDiff)
+  songTable:set_difficulty(newDiff)
 end
