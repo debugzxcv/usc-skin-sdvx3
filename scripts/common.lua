@@ -13,10 +13,9 @@ Image.skin = function(filename, imageFlags)
   setmetatable(this, {__index = Image})
   return this
 end
+
 -- anchor point is center
 Image.draw = function(this, x, y, alpha, angle)
---  gfx.BeginPath()
---  gfx.ImageRect(x - this.w / 2, y - this.h / 2, this.w, this.h, this.image, alpha, angle)
   this:drawSize(x, y, this.w, this.h, alpha, angle)
 end
 
@@ -38,7 +37,7 @@ ImageFont.new = function(path, chars)
     local image = Image.skin(string.format("%s/%s.png", path, c), 0)
     this.images[c] = image
   end
-  -- use size of first char
+  -- use size of first char as font size
   local w, h = gfx.ImageSize(this.images[chars:sub(1, 1)].image)
   this.w = w
   this.h = h
@@ -73,4 +72,3 @@ ImageFont.draw = function(this, text, x, y, alpha, textFlags)
     end
   end
 end
-

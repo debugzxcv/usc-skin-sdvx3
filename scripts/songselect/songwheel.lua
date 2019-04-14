@@ -30,7 +30,33 @@ local medals = {
   Image.skin("song_select/medal/puc.png", 0)
 }
 
+
+-- SongData class
+-----------------
+SongData = {}
+SongData.new = function()
+  local this = {
+    selectedIndex = 1,
+    images = {
+      dataBg = Image.skin("song_select/data_bg.png", 0)
+    }
+  }
+
+  setmetatable(this, {__index = SongData})
+  return this
+end
+
+SongData.render = function(this, deltaTime)
+  this.images.dataBg:draw(360, 176, 1, 0)
+end
+
+SongData.set_index = function(this, newIndex)
+  this.selectedIndex = newIndex
+end
+
+
 -- SongTable class
+------------------
 SongTable = {}
 SongTable.new = function()
   local this = {
@@ -184,15 +210,34 @@ get_page_size = function()
     return wheelSize
 end
 
+-- main
+-------
+
+songData = SongData.new()
 songTable = SongTable.new()
 
 -- Callback
 render = function(deltaTime)
+  gfx.ResetTransform()
+
+  local resx, resy = game.GetResolution()
+  local desw = 720
+  local desh = 1280
+  local scale = resy / desh
+
+  local xshift = (resx - desw * scale) / 2
+  local yshift = (resy - desh * scale) / 2
+
+  gfx.Translate(xshift, yshift)
+  gfx.Scale(scale, scale)
+
+  songData:render(deltaTime)
   songTable:render(deltaTime)
 end
 
 -- Callback
 set_index = function(newIndex)
+  songData:set_index(newIndex)
   songTable:set_index(newIndex)
 end
 
