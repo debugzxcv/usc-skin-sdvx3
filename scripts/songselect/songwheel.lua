@@ -5,7 +5,28 @@ gfx.LoadSkinFont("rounded-mplus-1c-bold.ttf")
 
 game.LoadSkinSample("cursor_song")
 
+local noGrade = Image.skin("song_select/grade/nograde.png", 0)
+local grades = {
+  {["min"] = 9900000, ["image"] = Image.skin("song_select/grade/s.png", 0)},
+  {["min"] = 9800000, ["image"] = Image.skin("song_select/grade/aaap.png", 0)},
+  {["min"] = 9700000, ["image"] = Image.skin("song_select/grade/aaa.png", 0)},
+  {["min"] = 9500000, ["image"] = Image.skin("song_select/grade/ap.png", 0)},
+  {["min"] = 9300000, ["image"] = Image.skin("song_select/grade/aa.png", 0)},
+  {["min"] = 9000000, ["image"] = Image.skin("song_select/grade/ap.png", 0)},
+  {["min"] = 8700000, ["image"] = Image.skin("song_select/grade/a.png", 0)},
+  {["min"] = 7500000, ["image"] = Image.skin("song_select/grade/b.png", 0)},
+  {["min"] = 6500000, ["image"] = Image.skin("song_select/grade/c.png", 0)},
+  {["min"] =       0, ["image"] = Image.skin("song_select/grade/d.png", 0)},
+}
 
+local noMedal = Image.skin("song_select/medal/nomedal.png", 0)
+local medals = {
+  Image.skin("song_select/medal/played.png", 0),
+  Image.skin("song_select/medal/clear.png", 0),
+  Image.skin("song_select/medal/hard.png", 0),
+  Image.skin("song_select/medal/uc.png", 0),
+  Image.skin("song_select/medal/puc.png", 0)
+}
 
 -- SongTable class
 SongTable = {}
@@ -15,6 +36,8 @@ SongTable.new = function()
     rows = 3,
     selectedIndex = 1,
     selectedDifficulty = 0,
+    rowOffset = 0, -- index of top-left song in page
+    cursorPos = 0, -- cursor position in page [0..cols * rows)
     cache = {},
     images = {
       jacketLoading = Image.skin("song_select/jacket_loading.png", 0),
@@ -36,19 +59,44 @@ SongTable.set_index = function(this, newIndex)
   if newIndex ~= this.selectedIndex then
     game.PlaySample("cursor_song")
   end
+
+  local delta = newIndex - this.selectedIndex
+  local newCursorPos = this.cursorPos + delta
+
+  if newCursorPos < 0 then
+    -- scroll up
+    this.rowOffset = this.rowOffset - this.cols
+    if this.rowOffset < 0 then
+      -- this.rowOffset = math.floor(#songwheel.songs / this.cols)
+    end
+    newCursorPos = newCursorPos + this.cols
+  elseif newCursorPos >= this.cols * this.rows then
+    -- scroll down
+    this.rowOffset = this.rowOffset + this.cols
+    newCursorPos = newCursorPos - this.cols
+  else
+    -- no scroll, move cursor in page
+  end
+  this.cursorPos = newCursorPos
   this.selectedIndex = newIndex
 end
 
 SongTable.render = function(this, deltaTime)
-  for i = 1, #songwheel.songs do
-    this:render_song(i)
-  end
+  this:render_songs()
   this:render_cursor()
 end
 
+SongTable.render_songs = function(this)
+  for i = 1, this.cols * this.rows do
+    if this.rowOffset + i <= #songwheel.songs then
+      this:render_song(i - 1, this.rowOffset + i)
+    end
+  end
+end
+
 -- Draw the song plate
-SongTable.render_song = function(this, index)
-  local song = songwheel.songs[index]
+SongTable.render_song = function(this, pos, songIndex)
+  local song = songwheel.songs[songIndex]
 
   -- Initialize song cache
   if not this.cache[song.id] then
@@ -65,8 +113,8 @@ SongTable.render_song = function(this, index)
   end
   local diff = song.difficulties[diffIndex]
 
-  local col = (index - 1) % this.cols
-  local row = math.floor((index - 1) / this.cols)
+  local col = pos % this.cols
+  local row = math.floor(pos / this.cols)
   local x = 154 + col * this.images.cursor.w + 4
   local y = 478 + row * this.images.cursor.h + 16
 
@@ -95,12 +143,30 @@ SongTable.render_song = function(this, index)
     this.cache[song.id]["title"] = title
   end
   gfx.DrawLabel(title, x - 22, y + 63, 125)
+
+  -- Draw the grade
+  local gradeImage = noGrade
+  local medalImage = noMedal
+  if diff.scores[1] ~= nil then
+		local highScore = diff.scores[1]
+    for i, v in ipairs(grades) do
+      if highScore.score >= v.min then
+        gradeImage = v.image
+        break
+      end
+    end
+    if diff.topBadge ~= 0 then
+      medalImage = medals[diff.topBadge]
+    end
+  end
+  gradeImage:draw(x + 78, y - 23, 1, 0)
+  medalImage:draw(x + 78, y + 10, 1, 0)
 end
 
 -- Draw the song cursor
 SongTable.render_cursor = function(this)
-  local col = (this.selectedIndex - 1) % this.cols
-  local row = math.floor((this.selectedIndex - 1) / this.cols)
+  local col = this.cursorPos % this.cols
+  local row = math.floor(this.cursorPos / this.cols)
   local x = 154 + col * this.images.cursor.w
   local y = 478 + row * this.images.cursor.h
   gfx.FillColor(255, 255, 255)
