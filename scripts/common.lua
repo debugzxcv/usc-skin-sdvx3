@@ -34,7 +34,11 @@ ImageFont.new = function(path, chars)
   -- load character images
   for i = 1, chars:len() do
     local c = chars:sub(i, i)
-    local image = Image.skin(string.format("%s/%s.png", path, c), 0)
+    local n = c
+    if c == "." then
+        n = "dot"
+    end
+    local image = Image.skin(string.format("%s/%s.png", path, n), 0)
     this.images[c] = image
   end
   -- use size of first char as font size
@@ -45,20 +49,20 @@ ImageFont.new = function(path, chars)
   setmetatable(this, {__index = ImageFont})
   return this
 end
-ImageFont.draw = function(this, text, x, y, alpha, textFlags)
+ImageFont.draw = function(this, text, x, y, alpha, hFlag, vFlag)
   local totalW = text:len() * this.w
 
   -- adjust horizontal alignment
-  if textFlags and gfx.TEXT_ALIGN_CENTER then
+  if hFlag == gfx.TEXT_ALIGN_CENTER then
     x = x - totalW / 2
-  elseif textFlags and gfx.TEXT_ALIGN_RIGHT then
+  elseif hFlag == gfx.TEXT_ALIGN_RIGHT then
     x = x - totalW
   end
 
   -- adjust vertical alignment
-  if textFlags and gfx.TEXT_ALIGN_MIDDLE then
+  if vFlag == gfx.TEXT_ALIGN_MIDDLE then
     y = y - this.h / 2
-  elseif textFlags and gfx.TEXT_ALIGN_BOTTOM then
+  elseif vFlag == gfx.TEXT_ALIGN_BOTTOM then
     y = y - this.h
   end
 
@@ -68,7 +72,7 @@ ImageFont.draw = function(this, text, x, y, alpha, textFlags)
     if image ~= nil then
       gfx.BeginPath()
       gfx.ImageRect(x, y, this.w, this.h, image.image, alpha, 0)
-      x = x + this.w
     end
+    x = x + this.w
   end
 end

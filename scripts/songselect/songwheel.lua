@@ -6,6 +6,7 @@ gfx.LoadSkinFont("rounded-mplus-1c-bold.ttf")
 game.LoadSkinSample("cursor_song")
 
 local levelFont = ImageFont.new("font-level", "0123456789")
+local bpmFont = ImageFont.new("number", "0123456789.") -- FIXME: font-default
 
 local noGrade = Image.skin("song_select/grade/nograde.png", 0)
 local grades = {
@@ -114,7 +115,7 @@ SongData.render = function(this, deltaTime)
     title = gfx.CreateLabel(song.title, 24, 0)
     this.cache[song.id]["title"] = title
   end
-  gfx.TextAlign(gfx.TEXT_ALIGN_LEFT or gfx.TEXT_ALIGN_BASELINE)
+  gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BASELINE)
   gfx.FillColor(55, 55, 55, 64)
   gfx.DrawLabel(title, 247, 135, 400)
   gfx.FillColor(55, 55, 55, 255)
@@ -127,7 +128,7 @@ SongData.render = function(this, deltaTime)
     artist = gfx.CreateLabel(song.artist, 18, 0)
     this.cache[song.id]["artist"] = artist
   end
-  gfx.TextAlign(gfx.TEXT_ALIGN_LEFT or gfx.TEXT_ALIGN_BASELINE)
+  gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BASELINE)
   gfx.FillColor(55, 55, 55, 64)
   gfx.DrawLabel(artist, 247, 172, 400)
   gfx.FillColor(55, 55, 55, 255)
@@ -141,9 +142,18 @@ SongData.render = function(this, deltaTime)
     effector = gfx.CreateLabel(diff.effector, 16, 0)
     this.cache[song.id][effectorKey] = effector
   end
-  gfx.TextAlign(gfx.TEXT_ALIGN_LEFT or gfx.TEXT_ALIGN_BASELINE)
+  gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BASELINE)
   gfx.FillColor(255, 255, 255, 255)
   gfx.DrawLabel(effector, 375, 77, 400)
+
+  -- Draw the bpm
+  -- FIXME: dot and dash was not rendered
+  levelFont:draw(song.bpm, 512, 63, 1, gfx.TEXT_ALIGN_LEFT, gfx.TEXT_ALIGN_MIDDLE)
+  -- gfx.LoadSkinFont("rounded-mplus-1c-bold.ttf")
+  -- gfx.FontSize(32)
+  -- gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BASELINE)
+  -- gfx.FillColor(255, 255, 255, 255)
+  -- gfx.Text(song.bpm, 510, 73)
 end
 
 SongData.set_index = function(this, newIndex)
@@ -268,7 +278,7 @@ SongTable.render_song = function(this, pos, songIndex)
     this.cache[song.id]["title"] = title
   end
   gfx.BeginPath()
-  gfx.TextAlign(gfx.TEXT_ALIGN_CENTER or gfx.TEXT_ALIGN_BASELINE)
+  gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_BASELINE)
   gfx.DrawLabel(title, x - 22, y + 53, 125)
 
   -- Draw the grade
@@ -291,7 +301,7 @@ SongTable.render_song = function(this, pos, songIndex)
 
   -- Draw the level
   local levelText = string.format("%02d", diff.level)
-  levelFont:draw(levelText, x + 72, y + 56, 1, gfx.TEXT_ALIGN_CENTER or gfx.TEXT_ALIGN_MIDDLE)
+  levelFont:draw(levelText, x + 72, y + 56, 1, gfx.TEXT_ALIGN_CENTER, gfx.TEXT_ALIGN_MIDDLE)
 end
 
 -- Draw the song cursor
