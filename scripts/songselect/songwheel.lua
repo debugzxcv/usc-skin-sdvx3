@@ -116,9 +116,9 @@ SongData.render = function(this, deltaTime)
   end
   gfx.TextAlign(gfx.TEXT_ALIGN_LEFT or gfx.TEXT_ALIGN_BASELINE)
   gfx.FillColor(55, 55, 55, 64)
-  gfx.DrawLabel(title, 247, 137, 400)
+  gfx.DrawLabel(title, 247, 135, 400)
   gfx.FillColor(55, 55, 55, 255)
-  gfx.DrawLabel(title, 245, 135, 400)
+  gfx.DrawLabel(title, 245, 133, 400)
 
   -- Draw the artist
   local artist = this.cache[song.id]["artist"]
@@ -149,7 +149,7 @@ SongTable.new = function(jacketCache)
     rows = 3,
     selectedIndex = 1,
     selectedDifficulty = 0,
-    rowOffset = 0, -- index of top-left song in page
+    rowOffset = 0, -- song index offset of top-left song in page
     cursorPos = 0, -- cursor position in page [0..cols * rows)
     cache = {},
     jacketCache = jacketCache,
@@ -174,23 +174,29 @@ SongTable.set_index = function(this, newIndex)
   end
 
   local delta = newIndex - this.selectedIndex
-  local newCursorPos = this.cursorPos + delta
-
-  if newCursorPos < 0 then
-    -- scroll up
-    this.rowOffset = this.rowOffset - this.cols
-    if this.rowOffset < 0 then
-      -- this.rowOffset = math.floor(#songwheel.songs / this.cols)
-    end
-    newCursorPos = newCursorPos + this.cols
-  elseif newCursorPos >= this.cols * this.rows then
-    -- scroll down
-    this.rowOffset = this.rowOffset + this.cols
-    newCursorPos = newCursorPos - this.cols
+  if delta < -1 or delta > 1 then
+    local newOffset = newIndex - 1
+    this.rowOffset = math.floor((newIndex - 1) / this.cols) * this.cols
+    this.cursorPos = (newIndex - 1) - this.rowOffset
   else
-    -- no scroll, move cursor in page
+    local newCursorPos = this.cursorPos + delta
+
+    if newCursorPos < 0 then
+      -- scroll up
+      this.rowOffset = this.rowOffset - this.cols
+      if this.rowOffset < 0 then
+        -- this.rowOffset = math.floor(#songwheel.songs / this.cols)
+      end
+      newCursorPos = newCursorPos + this.cols
+    elseif newCursorPos >= this.cols * this.rows then
+      -- scroll down
+      this.rowOffset = this.rowOffset + this.cols
+      newCursorPos = newCursorPos - this.cols
+    else
+      -- no scroll, move cursor in page
+    end
+    this.cursorPos = newCursorPos
   end
-  this.cursorPos = newCursorPos
   this.selectedIndex = newIndex
 end
 
