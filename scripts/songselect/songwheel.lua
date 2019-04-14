@@ -133,6 +133,17 @@ SongData.render = function(this, deltaTime)
   gfx.FillColor(55, 55, 55, 255)
   gfx.DrawLabel(artist, 245, 170, 400)
 
+  -- Draw the effector
+  local effectorKey = string.format("effector_%d", diff.id)
+  local effector = this.cache[song.id][effectorKey]
+  if not effector then
+    gfx.LoadSkinFont("rounded-mplus-1c-bold.ttf")
+    effector = gfx.CreateLabel(diff.effector, 16, 0)
+    this.cache[song.id][effectorKey] = effector
+  end
+  gfx.TextAlign(gfx.TEXT_ALIGN_LEFT or gfx.TEXT_ALIGN_BASELINE)
+  gfx.FillColor(255, 255, 255, 255)
+  gfx.DrawLabel(effector, 375, 77, 400)
 end
 
 SongData.set_index = function(this, newIndex)
