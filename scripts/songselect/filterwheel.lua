@@ -24,6 +24,7 @@ render = function(deltaTime, shown)
     if not shown then
         return
     end
+    gfx.ResetTransform()
     timer = (timer + deltaTime)
     timer = timer % 2
     resx,resy = game.GetResolution();

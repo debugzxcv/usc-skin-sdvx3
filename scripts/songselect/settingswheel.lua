@@ -5,6 +5,7 @@ local yoff = 0
 local lastSelected = 0
 
 render = function(deltaTime, shown)
+    gfx.ResetTransform()
     gfx.BeginPath();
     gfx.LoadSkinFont("segoeui.ttf");
     gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_MIDDLE);
