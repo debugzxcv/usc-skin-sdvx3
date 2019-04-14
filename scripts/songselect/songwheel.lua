@@ -18,6 +18,7 @@ SongTable.new = function()
     cache = {},
     images = {
       jacketLoading = Image.skin("song_select/jacket_loading.png", 0),
+      scoreBg = Image.skin("song_select/score_bg.png", 0),
       cursor = Image.skin("song_select/cursor.png", 0),
       plates = {
         Image.skin("song_select/plate/novice.png", 0),
@@ -69,8 +70,9 @@ SongTable.render_song = function(this, index)
   local x = 154 + col * this.images.cursor.w + 4
   local y = 478 + row * this.images.cursor.h + 16
 
-  -- Draw the background (plate)
+  -- Draw the background
   gfx.FillColor(255, 255, 255)
+  this.images.scoreBg:draw(x + 72, y + 16, 1, 0)
   this.images.plates[diff.difficulty + 1]:draw(x, y, 1, 0)
 
   -- Draw the jacket
@@ -79,15 +81,14 @@ SongTable.render_song = function(this, index)
     jacket = gfx.LoadImageJob(diff.jacketPath, this.images.jacketLoading.image)
     this.cache[song.id]["jacket"][diff.id] = jacket
   end
-  local jacketSize = 122
   gfx.FillColor(255, 255, 255, 1)
   gfx.BeginPath()
-  gfx.ImageRect(x - 24 - jacketSize / 2, y - 21 - jacketSize / 2, jacketSize, jacketSize, jacket, 1, 0)
+  local js = 122
+  gfx.ImageRect(x - 24 - js / 2, y - 21 - js / 2, js, js, jacket, 1, 0)
 
   -- Draw the title
   local title = this.cache[song.id]["title"]
   if not title then
-    -- gfx.FontFace("UDDigiKyokashoNP-B.ttf")
     gfx.FontFace("rounded-mplus-1c-bold.ttf")
     gfx.TextAlign(gfx.TEXT_ALIGN_CENTER or gfx.TEXT_ALIGN_BASELINE)
     title = gfx.CreateLabel(song.title, 14, 0)
@@ -96,6 +97,7 @@ SongTable.render_song = function(this, index)
   gfx.DrawLabel(title, x - 22, y + 63, 125)
 end
 
+-- Draw the song cursor
 SongTable.render_cursor = function(this)
   local col = (this.selectedIndex - 1) % this.cols
   local row = math.floor((this.selectedIndex - 1) / this.cols)
