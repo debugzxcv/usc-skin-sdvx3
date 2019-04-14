@@ -5,6 +5,56 @@ gfx.LoadSkinFont("rounded-mplus-1c-bold.ttf")
 
 game.LoadSkinSample("cursor_song")
 
+-- ImageFont class
+ImageFont = {}
+ImageFont.new = function(path, chars)
+  local this = {
+    images = {}
+  }
+  -- load character images
+  for i = 1, chars:len() do
+    local c = chars:sub(i, i)
+    local image = Image.skin(string.format("%s/%s.png", path, c), 0)
+    this.images[c] = image
+  end
+  -- use size of first char
+  local w, h = gfx.ImageSize(this.images[chars:sub(1, 1)].image)
+  this.w = w
+  this.h = h
+
+  setmetatable(this, {__index = ImageFont})
+  return this
+end
+ImageFont.draw = function(this, text, x, y, alpha, textFlags)
+  local totalW = text:len() * this.w
+
+  -- adjust horizontal alignment
+  if textFlags and gfx.TEXT_ALIGN_CENTER then
+    x = x - totalW / 2
+  elseif textFlags and gfx.TEXT_ALIGN_RIGHT then
+    x = x - totalW
+  end
+
+  -- adjust vertical alignment
+  if textFlags and gfx.TEXT_ALIGN_MIDDLE then
+    y = y - this.h / 2
+  elseif textFlags and gfx.TEXT_ALIGN_BOTTOM then
+    y = y - this.h
+  end
+
+  for i = 1, text:len() do
+    local c = text:sub(i, i)
+    local image = this.images[c]
+    if image ~= nil then
+      gfx.BeginPath()
+      gfx.ImageRect(x, y, this.w, this.h, image.image, alpha, 0)
+      x = x + this.w
+    end
+  end
+end
+
+local levelFont = ImageFont.new("font-level", "0123456789")
+
 local noGrade = Image.skin("song_select/grade/nograde.png", 0)
 local grades = {
   {["min"] = 9900000, ["image"] = Image.skin("song_select/grade/s.png", 0)},
@@ -161,6 +211,10 @@ SongTable.render_song = function(this, pos, songIndex)
   end
   gradeImage:draw(x + 78, y - 23, 1, 0)
   medalImage:draw(x + 78, y + 10, 1, 0)
+
+  -- Draw the level
+  local levelText = string.format("%02d", diff.level)
+  levelFont:draw(levelText, x + 72, y + 56, 1, gfx.TEXT_ALIGN_CENTER or gfx.TEXT_ALIGN_MIDDLE)
 end
 
 -- Draw the song cursor
