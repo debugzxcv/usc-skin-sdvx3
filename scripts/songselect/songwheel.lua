@@ -7,6 +7,7 @@ game.LoadSkinSample("cursor_song")
 game.LoadSkinSample("cursor_difficulty")
 
 local levelFont = ImageFont.new("font-level", "0123456789")
+local largeFont = ImageFont.new("font-large", "0123456789")
 local bpmFont = ImageFont.new("number", "0123456789.") -- FIXME: font-default
 
 local noGrade = Image.skin("song_select/grade/nograde.png", 0)
@@ -189,6 +190,9 @@ SongData.render_difficulty = function(this, index, diff)
   end
 
   this.images.difficulties[diff.difficulty + 1]:draw(x + index * 96, y, 1, 0)
+
+  local levelText = string.format("%02d", diff.level)
+  largeFont:draw(levelText, x + index * 96 - 4, y - 6, 1, gfx.TEXT_ALIGN_CENTER, gfx.TEXT_ALIGN_MIDDLE)
 end
 
 SongData.set_index = function(this, newIndex)
