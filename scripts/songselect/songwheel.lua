@@ -178,26 +178,33 @@ SongData.render = function(this, deltaTime)
 
   for i = 1, 4 do
     local d = lookup_difficulty(song.difficulties, i)
-    this:render_difficulty(i - 1, d, isSelected)
+    local jacket = this.jacketCache.images.loading.image
+    if d ~= nil then jacket = this.jacketCache:get(song.id, d.id, d.jacketPath) end
+    this:render_difficulty(i - 1, d, jacket)
   end
 
   this:render_cursor(diff.difficulty)
 end
 
-SongData.render_difficulty = function(this, index, diff, isSelected)
+SongData.render_difficulty = function(this, index, diff, jacket)
   local x = 344
   local y = 280
 
+  -- Draw the jacket icon
+  gfx.FillColor(255, 255, 255, 1)
+  gfx.BeginPath()
+  local js = 46
+  gfx.ImageRect(17 + index * 52, 262, js, js, jacket, 1, 0)
+
   if diff == nil then
     this.images.none:draw(x + index * 96, y, 1, 0)
-    return
+  else
+    -- Draw the background
+    this.images.difficulties[diff.difficulty + 1]:draw(x + index * 96, y, 1, 0)
+    -- Draw the level
+    local levelText = string.format("%02d", diff.level)
+    largeFont:draw(levelText, x + index * 96 - 4, y - 6, 1, gfx.TEXT_ALIGN_CENTER, gfx.TEXT_ALIGN_MIDDLE)
   end
-
-  -- Draw the background
-  this.images.difficulties[diff.difficulty + 1]:draw(x + index * 96, y, 1, 0)
-  -- Draw the level
-  local levelText = string.format("%02d", diff.level)
-  largeFont:draw(levelText, x + index * 96 - 4, y - 6, 1, gfx.TEXT_ALIGN_CENTER, gfx.TEXT_ALIGN_MIDDLE)
 end
 
 SongData.render_cursor = function(this, index)
