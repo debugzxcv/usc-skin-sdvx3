@@ -9,6 +9,8 @@ local levelFont = ImageFont.new("font-level", "0123456789")
 local largeFont = ImageFont.new("font-large", "0123456789")
 local bpmFont = ImageFont.new("number", "0123456789.") -- FIXME: font-default
 
+-- Grades
+---------
 local noGrade = Image.skin("song_select/grade/nograde.png")
 local grades = {
   {["min"] = 9900000, ["image"] = Image.skin("song_select/grade/s.png")},
@@ -23,6 +25,22 @@ local grades = {
   {["min"] =       0, ["image"] = Image.skin("song_select/grade/d.png")},
 }
 
+function lookup_grade_image(difficulty)
+  local gradeImage = noGrade
+  if difficulty.scores[1] ~= nil then
+		local highScore = difficulty.scores[1]
+    for i, v in ipairs(grades) do
+      if highScore.score >= v.min then
+        gradeImage = v.image
+        break
+      end
+    end
+  end
+  return gradeImage
+end
+
+-- Medals
+---------
 local noMedal = Image.skin("song_select/medal/nomedal.png")
 local medals = {
   Image.skin("song_select/medal/played.png"),
@@ -31,6 +49,16 @@ local medals = {
   Image.skin("song_select/medal/uc.png"),
   Image.skin("song_select/medal/puc.png")
 }
+
+function lookup_medal_image(difficulty)
+  local medalImage = noMedal
+  if difficulty.scores[1] ~= nil then
+    if difficulty.topBadge ~= 0 then
+      medalImage = medals[difficulty.topBadge]
+    end
+  end
+  return medalImage
+end
 
 -- Lookup difficulty
 function lookup_difficulty(diffs, diff)
@@ -46,7 +74,6 @@ function lookup_difficulty(diffs, diff)
   end
   return difficulty
 end
-
 
 -- JacketCache class
 --------------------
@@ -143,6 +170,22 @@ SongData.render = function(this, deltaTime)
   -- gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BASELINE)
   -- gfx.FillColor(255, 255, 255, 255)
   -- gfx.Text(song.bpm, 510, 73)
+
+  -- Draw the hi-score
+  local hiScore = diff.scores[1]
+  if hiScore then
+    -- FIXME: large / small font
+    local scoreText = string.format("%08d", hiScore.score)
+    levelFont:draw(scoreText, 362, 220, 1, gfx.TEXT_ALIGN_LEFT, gfx.TEXT_ALIGN_MIDDLE)
+    -- local scoreHiText = string.format("%05d", math.floor(hiScore.score / 1000))
+    -- levelFont:draw(scoreHiText, 362, 220, 1, gfx.TEXT_ALIGN_LEFT, gfx.TEXT_ALIGN_MIDDLE)
+    -- local scoreLoText = string.format("%03d", hiScore.score % 1000)
+    -- bpmFont:draw(scoreLoText, 470, 220, 1, gfx.TEXT_ALIGN_LEFT, gfx.TEXT_ALIGN_MIDDLE)
+  end
+
+  -- Draw the grade and medal
+  lookup_grade_image(diff):draw({ x = 554, y = 220 })
+  lookup_medal_image(diff):draw({ x = 600, y = 220 })
 
   for i = 1, 4 do
     local d = lookup_difficulty(song.difficulties, i)
@@ -307,23 +350,9 @@ SongTable.draw_song = function(this, pos, songIndex)
   gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_BASELINE)
   gfx.DrawLabel(title, x - 22, y + 53, 125)
 
-  -- Draw the grade
-  local gradeImage = noGrade
-  local medalImage = noMedal
-  if diff.scores[1] ~= nil then
-		local highScore = diff.scores[1]
-    for i, v in ipairs(grades) do
-      if highScore.score >= v.min then
-        gradeImage = v.image
-        break
-      end
-    end
-    if diff.topBadge ~= 0 then
-      medalImage = medals[diff.topBadge]
-    end
-  end
-  gradeImage:draw({ x = x + 78, y = y - 23 })
-  medalImage:draw({ x = x + 78, y = y + 10 })
+  -- Draw the grade and medal
+  lookup_grade_image(diff):draw({ x = x + 78, y = y - 23 })
+  lookup_medal_image(diff):draw({ x = x + 78, y = y + 10 })
 
   -- Draw the level
   local levelText = string.format("%02d", diff.level)
