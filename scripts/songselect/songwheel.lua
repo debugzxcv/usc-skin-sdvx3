@@ -58,7 +58,6 @@ JacketCache.new = function()
       loading = Image.skin("song_select/jacket_loading.png"),
     }
   }
-
   setmetatable(this, {__index = JacketCache})
   return this
 end
@@ -80,7 +79,7 @@ SongData.new = function(jacketCache)
   local this = {
     selectedIndex = 1,
     selectedDifficulty = 0,
-    cache = {},
+    memo = Memo.new(),
     jacketCache = jacketCache,
     images = {
       dataBg = Image.skin("song_select/data_bg.png"),
@@ -102,11 +101,6 @@ end
 SongData.render = function(this, deltaTime)
   local song = songwheel.songs[this.selectedIndex]
 
-  -- Initialize song cache
-  if not this.cache[song.id] then
-    this.cache[song.id] = {}
-  end
-
   -- Lookup difficulty
   local diff = lookup_difficulty(song.difficulties, this.selectedDifficulty)
   if diff == nil then diff = song.difficulties[#song.difficulties] end
@@ -119,39 +113,24 @@ SongData.render = function(this, deltaTime)
   jacket:draw({ x = 18, y = 58, w = 200, h = 200, anchor_h = Image.ANCHOR_LEFT, anchor_v = Image.ANCHOR_TOP })
 
   -- Draw the title
-  local title = this.cache[song.id]["title"]
-  if not title then
+  local title = this.memo:memoize(string.format("title_%s", song.id), function ()
     gfx.LoadSkinFont("rounded-mplus-1c-bold.ttf")
-    title = gfx.CreateLabel(song.title, 24, 0)
-    this.cache[song.id]["title"] = title
-  end
-  gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BASELINE)
-  gfx.FillColor(55, 55, 55, 64)
-  gfx.DrawLabel(title, 247, 135, 400)
-  gfx.FillColor(55, 55, 55, 255)
-  gfx.DrawLabel(title, 245, 133, 400)
+    return gfx.CreateLabel(song.title, 24, 0)
+  end)
+  this:draw_title_artist(title, 245, 133, 400)
 
   -- Draw the artist
-  local artist = this.cache[song.id]["artist"]
-  if not artist then
+  local artist = this.memo:memoize(string.format("artist_%s", song.id), function ()
     gfx.LoadSkinFont("rounded-mplus-1c-bold.ttf")
-    artist = gfx.CreateLabel(song.artist, 18, 0)
-    this.cache[song.id]["artist"] = artist
-  end
-  gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BASELINE)
-  gfx.FillColor(55, 55, 55, 64)
-  gfx.DrawLabel(artist, 247, 172, 400)
-  gfx.FillColor(55, 55, 55, 255)
-  gfx.DrawLabel(artist, 245, 170, 400)
+    return gfx.CreateLabel(song.artist, 18, 0)
+  end)
+  this:draw_title_artist(artist, 245, 170, 400)
 
   -- Draw the effector
-  local effectorKey = string.format("effector_%d", diff.id)
-  local effector = this.cache[song.id][effectorKey]
-  if not effector then
+  local effector = this.memo:memoize(string.format("eff_%s_%s", song.id, diff.id), function ()
     gfx.LoadSkinFont("rounded-mplus-1c-bold.ttf")
-    effector = gfx.CreateLabel(diff.effector, 16, 0)
-    this.cache[song.id][effectorKey] = effector
-  end
+    return gfx.CreateLabel(diff.effector, 16, 0)
+  end)
   gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BASELINE)
   gfx.FillColor(255, 255, 255, 255)
   gfx.DrawLabel(effector, 375, 77, 400)
@@ -167,13 +146,21 @@ SongData.render = function(this, deltaTime)
 
   for i = 1, 4 do
     local d = lookup_difficulty(song.difficulties, i)
-    this:render_difficulty(i - 1, d, jacket)
+    this:draw_difficulty(i - 1, d, jacket)
   end
 
-  this:render_cursor(diff.difficulty)
+  this:draw_cursor(diff.difficulty)
 end
 
-SongData.render_difficulty = function(this, index, diff, jacket)
+SongData.draw_title_artist = function(this, label, x, y, maxWidth)
+  gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BASELINE)
+  gfx.FillColor(55, 55, 55, 64)
+  gfx.DrawLabel(label, x + 2, y + 2, maxWidth)
+  gfx.FillColor(55, 55, 55, 255)
+  gfx.DrawLabel(label, x, y, maxWidth)
+end
+
+SongData.draw_difficulty = function(this, index, diff, jacket)
   local x = 344
   local y = 280
 
@@ -193,7 +180,7 @@ SongData.render_difficulty = function(this, index, diff, jacket)
   end
 end
 
-SongData.render_cursor = function(this, index)
+SongData.draw_cursor = function(this, index)
   local x = 344
   local y = 280
 
@@ -221,7 +208,7 @@ SongTable.new = function(jacketCache)
     selectedDifficulty = 0,
     rowOffset = 0, -- song index offset of top-left song in page
     cursorPos = 0, -- cursor position in page [0..cols * rows)
-    cache = {},
+    memo = Memo.new(),
     jacketCache = jacketCache,
     images = {
       scoreBg = Image.skin("song_select/score_bg.png"),
@@ -278,26 +265,21 @@ SongTable.set_difficulty = function(this, newDiff)
 end
 
 SongTable.render = function(this, deltaTime)
-  this:render_songs()
-  this:render_cursor()
+  this:draw_songs()
+  this:draw_cursor()
 end
 
-SongTable.render_songs = function(this)
+SongTable.draw_songs = function(this)
   for i = 1, this.cols * this.rows do
     if this.rowOffset + i <= #songwheel.songs then
-      this:render_song(i - 1, this.rowOffset + i)
+      this:draw_song(i - 1, this.rowOffset + i)
     end
   end
 end
 
 -- Draw the song plate
-SongTable.render_song = function(this, pos, songIndex)
+SongTable.draw_song = function(this, pos, songIndex)
   local song = songwheel.songs[songIndex]
-
-  -- Initialize song cache
-  if not this.cache[song.id] then
-    this.cache[song.id] = {}
-  end
 
   -- Lookup difficulty
   local diff = lookup_difficulty(song.difficulties, this.selectedDifficulty)
@@ -318,13 +300,10 @@ SongTable.render_song = function(this, pos, songIndex)
   jacket:draw({ x = x - 24, y = y - 21, w = 122, h = 122 })
 
   -- Draw the title
-  local title = this.cache[song.id]["title"]
-  if not title then
+  local title = this.memo:memoize(string.format("title_%s", song.id), function ()
     gfx.LoadSkinFont("rounded-mplus-1c-bold.ttf")
-    title = gfx.CreateLabel(song.title, 14, 0)
-    this.cache[song.id]["title"] = title
-  end
-  gfx.BeginPath()
+    return gfx.CreateLabel(song.title, 14, 0)
+  end)
   gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_BASELINE)
   gfx.DrawLabel(title, x - 22, y + 53, 125)
 
@@ -352,7 +331,7 @@ SongTable.render_song = function(this, pos, songIndex)
 end
 
 -- Draw the song cursor
-SongTable.render_cursor = function(this)
+SongTable.draw_cursor = function(this)
   local col = this.cursorPos % this.cols
   local row = math.floor(this.cursorPos / this.cols)
   local x = 154 + col * this.images.cursor.w
@@ -361,10 +340,6 @@ SongTable.render_cursor = function(this)
   this.images.cursor:draw({ x = x, y = y })
 end
 
-local wheelSize = 12
-get_page_size = function()
-    return wheelSize
-end
 
 -- main
 -------
@@ -372,6 +347,11 @@ end
 local jacketCache = JacketCache.new()
 local songData = SongData.new(jacketCache)
 local songTable = SongTable.new(jacketCache)
+
+-- Callback
+get_page_size = function()
+  return 12
+end
 
 -- Callback
 render = function(deltaTime)

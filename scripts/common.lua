@@ -1,5 +1,26 @@
 gfx.LoadSkinFont("segoeui.ttf")
 
+-- Memo class
+-------------
+Memo = {}
+Memo.new = function()
+  local this = {
+    cache = {}
+  }
+  setmetatable(this, {__index = Memo})
+  return this
+end
+
+Memo.memoize = function(this, key, generator)
+  local value = this.cache[key]
+  if not value then
+    value = generator()
+    this.cache[key] = value
+  end
+  return value
+end
+
+
 -- Image class
 --------------
 Image = {
@@ -50,6 +71,7 @@ Image.draw = function(this, params)
   gfx.BeginPath()
   gfx.ImageRect(x, y, w, h, this.image, alpha, angle)
 end
+
 
 -- ImageFont class
 ------------------
