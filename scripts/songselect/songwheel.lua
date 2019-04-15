@@ -91,6 +91,7 @@ SongData.new = function(jacketCache)
     jacketCache = jacketCache,
     images = {
       dataBg = Image.skin("song_select/data_bg.png", 0),
+      cursor = Image.skin("song_select/level_cursor.png", 0),
       none = Image.skin("song_select/level/none.png", 0),
       difficulties = {
         Image.skin("song_select/level/novice.png", 0),
@@ -176,23 +177,35 @@ SongData.render = function(this, deltaTime)
   -- gfx.Text(song.bpm, 510, 73)
 
   for i = 1, 4 do
-    local diff = lookup_difficulty(song.difficulties, i)
-    this:render_difficulty(i - 1, diff)
+    local d = lookup_difficulty(song.difficulties, i)
+    this:render_difficulty(i - 1, d, isSelected)
   end
+
+  this:render_cursor(diff.difficulty)
 end
 
-SongData.render_difficulty = function(this, index, diff)
+SongData.render_difficulty = function(this, index, diff, isSelected)
   local x = 344
   local y = 280
+
   if diff == nil then
     this.images.none:draw(x + index * 96, y, 1, 0)
     return
   end
 
+  -- Draw the background
   this.images.difficulties[diff.difficulty + 1]:draw(x + index * 96, y, 1, 0)
-
+  -- Draw the level
   local levelText = string.format("%02d", diff.level)
   largeFont:draw(levelText, x + index * 96 - 4, y - 6, 1, gfx.TEXT_ALIGN_CENTER, gfx.TEXT_ALIGN_MIDDLE)
+end
+
+SongData.render_cursor = function(this, index)
+  local x = 344
+  local y = 280
+
+  --  Draw the cursor
+  this.images.cursor:draw(x + index * 96, y - 3, 1, 0)
 end
 
 SongData.set_index = function(this, newIndex)
