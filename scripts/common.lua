@@ -2,7 +2,13 @@ gfx.LoadSkinFont("segoeui.ttf")
 
 -- Image class
 --------------
-Image = {}
+Image = {
+  ANCHOR_LEFT = 1,
+  ANCHOR_CENTER = 2,
+  ANCHOR_RIGHT = 4,
+  ANCHOR_TOP = 8,
+  ANCHOR_BOTTOM = 16
+}
 Image.skin = function(filename, imageFlags)
   imageFlags = imageFlags or 0
   image = gfx.CreateSkinImage(filename, imageFlags)
@@ -19,14 +25,30 @@ Image.wrap = function(image)
   return this
 end
 
--- anchor point is center
-Image.draw = function(this, x, y, alpha, angle)
-  this:drawSize(x, y, this.w, this.h, alpha, angle)
-end
+Image.draw = function(this, params)
+  local x = params.x
+  local y = params.y
+  local w = params.w or this.w
+  local h = params.h or this.h
+  local alpha = params.alpha or 1
+  local angle = params.angle or 0
+  local anchor_h = params.anchor_h or Image.ANCHOR_CENTER
+  local anchor_v = params.anchor_v or Image.ANCHOR_CENTER
 
-Image.drawSize = function(this, x, y, w, h, alpha, angle)
+  if anchor_h == Image.ANCHOR_CENTER then
+    x = x - w / 2
+  elseif anchor_h == Image.ANCHOR_RIGHT then
+    x = x - w
+  end
+
+  if anchor_v == Image.ANCHOR_CENTER then
+    y = y - h / 2
+  elseif anchor_v == Image.ANCHOR_BOTTOM then
+    y = y - h
+  end
+
   gfx.BeginPath()
-  gfx.ImageRect(x - w / 2, y - h / 2, w, h, this.image, alpha, angle)
+  gfx.ImageRect(x, y, w, h, this.image, alpha, angle)
 end
 
 -- ImageFont class

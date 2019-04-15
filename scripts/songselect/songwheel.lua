@@ -69,7 +69,7 @@ JacketCache.get = function(this, path)
     jacket = gfx.LoadImageJob(path, this.images.loading.image)
     this.cache[path] = jacket
   end
-  return jacket
+  return Image.wrap(jacket)
 end
 
 
@@ -112,14 +112,11 @@ SongData.render = function(this, deltaTime)
   if diff == nil then diff = song.difficulties[#song.difficulties] end
 
   -- Draw the background
-  this.images.dataBg:draw(360, 176, 1, 0)
+  this.images.dataBg:draw({ x = 360, y = 176 })
 
   -- Draw the jacket
   local jacket = this.jacketCache:get(diff.jacketPath)
-  gfx.FillColor(255, 255, 255, 1)
-  gfx.BeginPath()
-  local js = 200
-  gfx.ImageRect(18, 58, js, js, jacket, 1, 0)
+  jacket:draw({ x = 18, y = 58, w = 200, h = 200, anchor_h = Image.ANCHOR_LEFT, anchor_v = Image.ANCHOR_TOP })
 
   -- Draw the title
   local title = this.cache[song.id]["title"]
@@ -181,17 +178,15 @@ SongData.render_difficulty = function(this, index, diff, jacket)
   local y = 280
 
   -- Draw the jacket icon
-  local jacket = this.jacketCache.images.loading.image
+  local jacket = this.jacketCache.images.loading
   if diff ~= nil then jacket = this.jacketCache:get(diff.jacketPath) end
-  gfx.FillColor(255, 255, 255, 1)
-  gfx.BeginPath()
-  gfx.ImageRect(17 + index * 52, 262, 46, 46, jacket, 1, 0)
+  jacket:draw({ x = 17 + index * 52, y = 262, w = 46, h = 46, anchor_h = Image.ANCHOR_LEFT, anchor_v = Image.ANCHOR_TOP })
 
   if diff == nil then
-    this.images.none:draw(x + index * 96, y, 1, 0)
+    this.images.none:draw({ x = x + index * 96, y = y })
   else
     -- Draw the background
-    this.images.difficulties[diff.difficulty + 1]:draw(x + index * 96, y, 1, 0)
+    this.images.difficulties[diff.difficulty + 1]:draw({ x = x + index * 96, y = y })
     -- Draw the level
     local levelText = string.format("%02d", diff.level)
     largeFont:draw(levelText, x + index * 96 - 4, y - 6, 1, gfx.TEXT_ALIGN_CENTER, gfx.TEXT_ALIGN_MIDDLE)
@@ -202,8 +197,8 @@ SongData.render_cursor = function(this, index)
   local x = 344
   local y = 280
 
-  --  Draw the cursor
-  this.images.cursor:draw(x + index * 96, y - 3, 1, 0)
+  -- Draw the cursor
+  this.images.cursor:draw({ x = x + index * 96, y = y - 3 })
 end
 
 SongData.set_index = function(this, newIndex)
@@ -315,15 +310,12 @@ SongTable.render_song = function(this, pos, songIndex)
 
   -- Draw the background
   gfx.FillColor(255, 255, 255)
-  this.images.scoreBg:draw(x + 72, y + 16, 1, 0)
-  this.images.plates[diff.difficulty + 1]:draw(x, y, 1, 0)
+  this.images.scoreBg:draw({ x = x + 72, y = y + 16 })
+  this.images.plates[diff.difficulty + 1]:draw({ x = x, y  = y })
 
   -- Draw the jacket
   local jacket = this.jacketCache:get(diff.jacketPath)
-  gfx.FillColor(255, 255, 255, 1)
-  gfx.BeginPath()
-  local js = 122
-  gfx.ImageRect(x - 24 - js / 2, y - 21 - js / 2, js, js, jacket, 1, 0)
+  jacket:draw({ x = x - 24, y = y - 21, w = 122, h = 122 })
 
   -- Draw the title
   local title = this.cache[song.id]["title"]
@@ -351,8 +343,8 @@ SongTable.render_song = function(this, pos, songIndex)
       medalImage = medals[diff.topBadge]
     end
   end
-  gradeImage:draw(x + 78, y - 23, 1, 0)
-  medalImage:draw(x + 78, y + 10, 1, 0)
+  gradeImage:draw({ x = x + 78, y = y - 23 })
+  medalImage:draw({ x = x + 78, y = y + 10 })
 
   -- Draw the level
   local levelText = string.format("%02d", diff.level)
@@ -366,7 +358,7 @@ SongTable.render_cursor = function(this)
   local x = 154 + col * this.images.cursor.w
   local y = 478 + row * this.images.cursor.h
   gfx.FillColor(255, 255, 255)
-  this.images.cursor:draw(x, y, 1, 0)
+  this.images.cursor:draw({ x = x, y = y })
 end
 
 local wheelSize = 12
