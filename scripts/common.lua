@@ -4,8 +4,13 @@ gfx.LoadSkinFont("segoeui.ttf")
 --------------
 Image = {}
 Image.skin = function(filename, imageFlags)
+  imageFlags = imageFlags or 0
+  image = gfx.CreateSkinImage(filename, imageFlags)
+  return Image.wrap(image)
+end
+Image.wrap = function(image)
   local this = {
-    image = gfx.CreateSkinImage(filename, imageFlags)
+    image = image
   }
   local w, h = gfx.ImageSize(this.image)
   this.w = w

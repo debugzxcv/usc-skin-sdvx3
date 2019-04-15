@@ -1,6 +1,5 @@
 require("easing")
 
-gfx.LoadSkinFont("UDDigiKyokashoNP-B.ttf")
 gfx.LoadSkinFont("rounded-mplus-1c-bold.ttf")
 
 game.LoadSkinSample("cursor_song")
@@ -10,27 +9,27 @@ local levelFont = ImageFont.new("font-level", "0123456789")
 local largeFont = ImageFont.new("font-large", "0123456789")
 local bpmFont = ImageFont.new("number", "0123456789.") -- FIXME: font-default
 
-local noGrade = Image.skin("song_select/grade/nograde.png", 0)
+local noGrade = Image.skin("song_select/grade/nograde.png")
 local grades = {
-  {["min"] = 9900000, ["image"] = Image.skin("song_select/grade/s.png", 0)},
-  {["min"] = 9800000, ["image"] = Image.skin("song_select/grade/aaap.png", 0)},
-  {["min"] = 9700000, ["image"] = Image.skin("song_select/grade/aaa.png", 0)},
-  {["min"] = 9500000, ["image"] = Image.skin("song_select/grade/ap.png", 0)},
-  {["min"] = 9300000, ["image"] = Image.skin("song_select/grade/aa.png", 0)},
-  {["min"] = 9000000, ["image"] = Image.skin("song_select/grade/ap.png", 0)},
-  {["min"] = 8700000, ["image"] = Image.skin("song_select/grade/a.png", 0)},
-  {["min"] = 7500000, ["image"] = Image.skin("song_select/grade/b.png", 0)},
-  {["min"] = 6500000, ["image"] = Image.skin("song_select/grade/c.png", 0)},
-  {["min"] =       0, ["image"] = Image.skin("song_select/grade/d.png", 0)},
+  {["min"] = 9900000, ["image"] = Image.skin("song_select/grade/s.png")},
+  {["min"] = 9800000, ["image"] = Image.skin("song_select/grade/aaap.png")},
+  {["min"] = 9700000, ["image"] = Image.skin("song_select/grade/aaa.png")},
+  {["min"] = 9500000, ["image"] = Image.skin("song_select/grade/ap.png")},
+  {["min"] = 9300000, ["image"] = Image.skin("song_select/grade/aa.png")},
+  {["min"] = 9000000, ["image"] = Image.skin("song_select/grade/ap.png")},
+  {["min"] = 8700000, ["image"] = Image.skin("song_select/grade/a.png")},
+  {["min"] = 7500000, ["image"] = Image.skin("song_select/grade/b.png")},
+  {["min"] = 6500000, ["image"] = Image.skin("song_select/grade/c.png")},
+  {["min"] =       0, ["image"] = Image.skin("song_select/grade/d.png")},
 }
 
-local noMedal = Image.skin("song_select/medal/nomedal.png", 0)
+local noMedal = Image.skin("song_select/medal/nomedal.png")
 local medals = {
-  Image.skin("song_select/medal/played.png", 0),
-  Image.skin("song_select/medal/clear.png", 0),
-  Image.skin("song_select/medal/hard.png", 0),
-  Image.skin("song_select/medal/uc.png", 0),
-  Image.skin("song_select/medal/puc.png", 0)
+  Image.skin("song_select/medal/played.png"),
+  Image.skin("song_select/medal/clear.png"),
+  Image.skin("song_select/medal/hard.png"),
+  Image.skin("song_select/medal/uc.png"),
+  Image.skin("song_select/medal/puc.png")
 }
 
 -- Lookup difficulty
@@ -56,7 +55,7 @@ JacketCache.new = function()
   local this = {
     cache = {},
     images = {
-      loading = Image.skin("song_select/jacket_loading.png", 0),
+      loading = Image.skin("song_select/jacket_loading.png"),
     }
   }
 
@@ -64,17 +63,11 @@ JacketCache.new = function()
   return this
 end
 
-JacketCache.get = function(this, songId, diffId, path)
-  local songCache = this.cache[songId]
-  if not songCache then
-    songCache = {}
-    this.cache[songId] = songCache
-  end
-
-  local jacket = songCache[diffId]
+JacketCache.get = function(this, path)
+  local jacket = this.cache[path]
   if not jacket or jacket == this.images.loading.image then
     jacket = gfx.LoadImageJob(path, this.images.loading.image)
-    songCache[diffId] = jacket
+    this.cache[path] = jacket
   end
   return jacket
 end
@@ -90,14 +83,14 @@ SongData.new = function(jacketCache)
     cache = {},
     jacketCache = jacketCache,
     images = {
-      dataBg = Image.skin("song_select/data_bg.png", 0),
-      cursor = Image.skin("song_select/level_cursor.png", 0),
-      none = Image.skin("song_select/level/none.png", 0),
+      dataBg = Image.skin("song_select/data_bg.png"),
+      cursor = Image.skin("song_select/level_cursor.png"),
+      none = Image.skin("song_select/level/none.png"),
       difficulties = {
-        Image.skin("song_select/level/novice.png", 0),
-        Image.skin("song_select/level/advanced.png", 0),
-        Image.skin("song_select/level/exhaust.png", 0),
-        Image.skin("song_select/level/gravity.png", 0)
+        Image.skin("song_select/level/novice.png"),
+        Image.skin("song_select/level/advanced.png"),
+        Image.skin("song_select/level/exhaust.png"),
+        Image.skin("song_select/level/gravity.png")
       },
     }
   }
@@ -122,7 +115,7 @@ SongData.render = function(this, deltaTime)
   this.images.dataBg:draw(360, 176, 1, 0)
 
   -- Draw the jacket
-  local jacket = this.jacketCache:get(song.id, diff.id, diff.jacketPath)
+  local jacket = this.jacketCache:get(diff.jacketPath)
   gfx.FillColor(255, 255, 255, 1)
   gfx.BeginPath()
   local js = 200
@@ -131,7 +124,6 @@ SongData.render = function(this, deltaTime)
   -- Draw the title
   local title = this.cache[song.id]["title"]
   if not title then
-    -- gfx.FontFace("rounded-mplus-1c-bold.ttf")
     gfx.LoadSkinFont("rounded-mplus-1c-bold.ttf")
     title = gfx.CreateLabel(song.title, 24, 0)
     this.cache[song.id]["title"] = title
@@ -178,8 +170,6 @@ SongData.render = function(this, deltaTime)
 
   for i = 1, 4 do
     local d = lookup_difficulty(song.difficulties, i)
-    local jacket = this.jacketCache.images.loading.image
-    if d ~= nil then jacket = this.jacketCache:get(song.id, d.id, d.jacketPath) end
     this:render_difficulty(i - 1, d, jacket)
   end
 
@@ -191,10 +181,11 @@ SongData.render_difficulty = function(this, index, diff, jacket)
   local y = 280
 
   -- Draw the jacket icon
+  local jacket = this.jacketCache.images.loading.image
+  if diff ~= nil then jacket = this.jacketCache:get(diff.jacketPath) end
   gfx.FillColor(255, 255, 255, 1)
   gfx.BeginPath()
-  local js = 46
-  gfx.ImageRect(17 + index * 52, 262, js, js, jacket, 1, 0)
+  gfx.ImageRect(17 + index * 52, 262, 46, 46, jacket, 1, 0)
 
   if diff == nil then
     this.images.none:draw(x + index * 96, y, 1, 0)
@@ -238,13 +229,13 @@ SongTable.new = function(jacketCache)
     cache = {},
     jacketCache = jacketCache,
     images = {
-      scoreBg = Image.skin("song_select/score_bg.png", 0),
-      cursor = Image.skin("song_select/cursor.png", 0),
+      scoreBg = Image.skin("song_select/score_bg.png"),
+      cursor = Image.skin("song_select/cursor.png"),
       plates = {
-        Image.skin("song_select/plate/novice.png", 0),
-        Image.skin("song_select/plate/advanced.png", 0),
-        Image.skin("song_select/plate/exhaust.png", 0),
-        Image.skin("song_select/plate/gravity.png", 0)
+        Image.skin("song_select/plate/novice.png"),
+        Image.skin("song_select/plate/advanced.png"),
+        Image.skin("song_select/plate/exhaust.png"),
+        Image.skin("song_select/plate/gravity.png")
       }
     }
   }
@@ -328,7 +319,7 @@ SongTable.render_song = function(this, pos, songIndex)
   this.images.plates[diff.difficulty + 1]:draw(x, y, 1, 0)
 
   -- Draw the jacket
-  local jacket = this.jacketCache:get(song.id, diff.id, diff.jacketPath)
+  local jacket = this.jacketCache:get(diff.jacketPath)
   gfx.FillColor(255, 255, 255, 1)
   gfx.BeginPath()
   local js = 122
@@ -337,7 +328,6 @@ SongTable.render_song = function(this, pos, songIndex)
   -- Draw the title
   local title = this.cache[song.id]["title"]
   if not title then
-    -- gfx.FontFace("rounded-mplus-1c-bold.ttf")
     gfx.LoadSkinFont("rounded-mplus-1c-bold.ttf")
     title = gfx.CreateLabel(song.title, 14, 0)
     this.cache[song.id]["title"] = title
