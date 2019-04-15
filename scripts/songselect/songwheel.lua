@@ -127,6 +127,7 @@ end
 
 SongData.render = function(this, deltaTime)
   local song = songwheel.songs[this.selectedIndex]
+  if not song then return end
 
   -- Lookup difficulty
   local diff = lookup_difficulty(song.difficulties, this.selectedDifficulty)
@@ -323,6 +324,7 @@ end
 -- Draw the song plate
 SongTable.draw_song = function(this, pos, songIndex)
   local song = songwheel.songs[songIndex]
+  if not song then return end
 
   -- Lookup difficulty
   local diff = lookup_difficulty(song.difficulties, this.selectedDifficulty)
