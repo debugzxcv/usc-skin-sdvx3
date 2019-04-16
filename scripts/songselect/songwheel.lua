@@ -16,7 +16,7 @@ local grades = {
   {["min"] = 9900000, ["image"] = Image.skin("song_select/grade/s.png")},
   {["min"] = 9800000, ["image"] = Image.skin("song_select/grade/aaap.png")},
   {["min"] = 9700000, ["image"] = Image.skin("song_select/grade/aaa.png")},
-  {["min"] = 9500000, ["image"] = Image.skin("song_select/grade/ap.png")},
+  {["min"] = 9500000, ["image"] = Image.skin("song_select/grade/aap.png")},
   {["min"] = 9300000, ["image"] = Image.skin("song_select/grade/aa.png")},
   {["min"] = 9000000, ["image"] = Image.skin("song_select/grade/ap.png")},
   {["min"] = 8700000, ["image"] = Image.skin("song_select/grade/a.png")},
@@ -397,7 +397,7 @@ SongTable.draw_cursor = function(this)
   this.images.cursorText:draw({ x = x - 96, y = y - 290 + offset, alpha = alpha })
   gfx.ResetScissor()
 
-  -- diamong
+  -- diamong wireframe
   local h = (this.images.cursorDiamondWire.h * 1.5) * easing.outQuad(t * 2, 0, 1, 1)
   this.images.cursorDiamondWire:draw({ x = x, y = y, w = this.images.cursorDiamondWire.w * 1.5, h = h, alpha = 0.5 })
 
@@ -410,6 +410,7 @@ SongTable.draw_cursor = function(this)
   -- local w = this.images.cursor.w * easing.outSine(t, 1, 0.05, 0.5)
   this.images.cursor:draw({ x = x, y = y, alpha = glowState and 0.8 or 1 })
 
+  -- diamond knot
   gfx.GlobalCompositeOperation(gfx.BLEND_OP_LIGHTER)
   this.images.cursorDiamond:draw({ x = x + 100, y = y, alpha = 1 })
   this.images.cursorDiamond:draw({ x = x - 100, y = y, alpha = 1 })
