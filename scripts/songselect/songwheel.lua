@@ -134,8 +134,8 @@ SongData.render = function(this, deltaTime)
   if not song then return end
 
   -- Lookup difficulty
-  local diff = lookup_difficulty(song.difficulties, this.selectedDifficulty)
-  if diff == nil then diff = song.difficulties[#song.difficulties] end
+  local diff = song.difficulties[this.selectedDifficulty]
+  if diff == nil then diff = song.difficulties[1] end
 
   -- Draw the background
   this.images.dataBg:draw({ x = 360, y = 176 })
@@ -149,14 +149,14 @@ SongData.render = function(this, deltaTime)
     gfx.LoadSkinFont("rounded-mplus-1c-bold.ttf")
     return gfx.CreateLabel(song.title, 24, 0)
   end)
-  this:draw_title_artist(title, 245, 133, 400)
+  this:draw_title_artist(title, 245, 133, 390)
 
   -- Draw the artist
   local artist = this.memo:memoize(string.format("artist_%s", song.id), function ()
     gfx.LoadSkinFont("rounded-mplus-1c-bold.ttf")
     return gfx.CreateLabel(song.artist, 18, 0)
   end)
-  this:draw_title_artist(artist, 245, 170, 400)
+  this:draw_title_artist(artist, 245, 170, 390)
 
   -- Draw the effector
   local effector = this.memo:memoize(string.format("eff_%s_%s", song.id, diff.id), function ()
@@ -165,7 +165,7 @@ SongData.render = function(this, deltaTime)
   end)
   gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BASELINE)
   gfx.FillColor(255, 255, 255, 255)
-  gfx.DrawLabel(effector, 375, 77, 400)
+  gfx.DrawLabel(effector, 375, 77, 320)
 
   -- Draw the bpm
   -- FIXME: dot and dash was not rendered
@@ -336,8 +336,8 @@ SongTable.draw_song = function(this, pos, songIndex)
   if not song then return end
 
   -- Lookup difficulty
-  local diff = lookup_difficulty(song.difficulties, this.selectedDifficulty)
-  if diff == nil then diff = song.difficulties[#song.difficulties] end
+  local diff = song.difficulties[this.selectedDifficulty]
+  if diff == nil then diff = song.difficulties[1] end
 
   local col = pos % this.cols
   local row = math.floor(pos / this.cols)
