@@ -14,5 +14,6 @@ void main()
 {
 	float s = float(hitState);
 	vec4 color = texture(mainTex, vec2(fsTex.x, s / 4 + fsTex.y / 4));
-	target = color;
+	target.xyz = color.xyz;
+	target.a = color.a * 0.8; // "color.a * 0.8;" = dimming hold button
 }
