@@ -1,4 +1,4 @@
-require("easing")
+easing = require("easing")
 
 gfx.LoadSkinFont("rounded-mplus-1c-bold.ttf")
 
@@ -36,7 +36,7 @@ function lookup_grade_image(difficulty)
       end
     end
   end
-  return gradeImage
+  return { image = gradeImage, flicker = (gradeImage == grades[1].image) }
 end
 
 -- Medals
@@ -52,12 +52,16 @@ local medals = {
 
 function lookup_medal_image(difficulty)
   local medalImage = noMedal
+  local flicker = false
   if difficulty.scores[1] ~= nil then
     if difficulty.topBadge ~= 0 then
       medalImage = medals[difficulty.topBadge]
+      if difficulty.topBadge >= 3 then -- hard
+        flicker = true
+      end
     end
   end
-  return medalImage
+  return { image = medalImage, flicker = flicker }
 end
 
 -- Lookup difficulty
@@ -185,8 +189,10 @@ SongData.render = function(this, deltaTime)
   end
 
   -- Draw the grade and medal
-  lookup_grade_image(diff):draw({ x = 554, y = 220 })
-  lookup_medal_image(diff):draw({ x = 600, y = 220 })
+  local grade = lookup_grade_image(diff)
+  grade.image:draw({ x = 554, y = 220, alpha = grade.flicker and glowState and 0.9 or 1 })
+  local medal = lookup_medal_image(diff)
+  medal.image:draw({ x = 600, y = 220, alpha = medal.flicker and glowState and 0.9 or 1 })
 
   for i = 1, 4 do
     local d = lookup_difficulty(song.difficulties, i)
@@ -257,6 +263,9 @@ SongTable.new = function(jacketCache)
     images = {
       scoreBg = Image.skin("song_select/score_bg.png"),
       cursor = Image.skin("song_select/cursor.png"),
+      cursorText = Image.skin("song_select/cursor_text.png"),
+      cursorDiamond = Image.skin("song_select/cursor_diamond.png"),
+      cursorDiamondWire = Image.skin("song_select/cursor_diamond_wire.png"),
       plates = {
         Image.skin("song_select/plate/novice.png"),
         Image.skin("song_select/plate/advanced.png"),
@@ -353,8 +362,11 @@ SongTable.draw_song = function(this, pos, songIndex)
   gfx.DrawLabel(title, x - 22, y + 53, 125)
 
   -- Draw the grade and medal
-  lookup_grade_image(diff):draw({ x = x + 78, y = y - 23 })
-  lookup_medal_image(diff):draw({ x = x + 78, y = y + 10 })
+  local grade = lookup_grade_image(diff)
+  grade.image:draw({ x = x + 78, y = y - 23, alpha = grade.flicker and glowState and 0.9 or 1 })
+
+  local medal = lookup_medal_image(diff)
+  medal.image:draw({ x = x + 78, y = y + 10, alpha = medal.flicker and glowState and 0.9 or 1 })
 
   -- Draw the level
   local levelText = string.format("%02d", diff.level)
@@ -363,12 +375,50 @@ end
 
 -- Draw the song cursor
 SongTable.draw_cursor = function(this)
+  gfx.Save()
+
   local col = this.cursorPos % this.cols
   local row = math.floor(this.cursorPos / this.cols)
   local x = 154 + col * this.images.cursor.w
   local y = 478 + row * this.images.cursor.h
   gfx.FillColor(255, 255, 255)
-  this.images.cursor:draw({ x = x, y = y })
+
+  local t = currentTime % 1
+
+  -- scroll text
+  gfx.Scissor(
+    x - this.images.cursor.w / 2, y - (this.images.cursor.h - 30) / 2,
+    this.images.cursor.w, this.images.cursor.h - 30)
+  local offset = (currentTime * 50) % 290
+  local alpha = glowState and 0.8 or 1
+  this.images.cursorText:draw({ x = x + 96, y = y + offset, alpha = alpha })
+  this.images.cursorText:draw({ x = x + 96, y = y - 290 + offset, alpha = alpha })
+  this.images.cursorText:draw({ x = x - 96, y = y + offset, alpha = alpha })
+  this.images.cursorText:draw({ x = x - 96, y = y - 290 + offset, alpha = alpha })
+  gfx.ResetScissor()
+
+  -- diamong
+  local h = (this.images.cursorDiamondWire.h * 1.5) * easing.outQuad(t * 2, 0, 1, 1)
+  this.images.cursorDiamondWire:draw({ x = x, y = y, w = this.images.cursorDiamondWire.w * 1.5, h = h, alpha = 0.5 })
+
+  -- ghost cursor
+  alpha = easing.outSine(t, 1, -1, 1)
+  h = this.images.cursor.h * easing.outSine(t, 0, 1, 1)
+  this.images.cursor:draw({ x = x, y = y, h = h, alpha = alpha })
+
+  -- concrete cursor
+  -- local w = this.images.cursor.w * easing.outSine(t, 1, 0.05, 0.5)
+  this.images.cursor:draw({ x = x, y = y, alpha = glowState and 0.8 or 1 })
+
+  gfx.GlobalCompositeOperation(gfx.BLEND_OP_LIGHTER)
+  this.images.cursorDiamond:draw({ x = x + 100, y = y, alpha = 1 })
+  this.images.cursorDiamond:draw({ x = x - 100, y = y, alpha = 1 })
+
+  local s = this.images.cursorDiamond.w / 1.5
+  this.images.cursorDiamond:draw({ x = x + 90 + easing.outQuad(t, 0, -4, 0.5), y = y, w = s, h = s, alpha = 0.5 })
+  this.images.cursorDiamond:draw({ x = x - 90 - easing.outQuad(t, 0, -4, 0.5), y = y, w = s, h = s, alpha = 0.5 })
+
+  gfx.Restore()
 end
 
 
@@ -379,6 +429,9 @@ local jacketCache = JacketCache.new()
 local songData = SongData.new(jacketCache)
 local songTable = SongTable.new(jacketCache)
 
+glowState = false
+currentTime = 0
+
 -- Callback
 get_page_size = function()
   return 12
@@ -386,6 +439,14 @@ end
 
 -- Callback
 render = function(deltaTime)
+  currentTime = currentTime + deltaTime
+
+  if ((math.floor(currentTime * 1000) % 100) < 50) then
+    glowState = false
+  else
+    glowState = true
+  end
+
   gfx.ResetTransform()
 
   local resx, resy = game.GetResolution()
