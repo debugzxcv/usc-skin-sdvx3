@@ -258,6 +258,8 @@ SongTable.new = function(jacketCache)
     selectedDifficulty = 0,
     rowOffset = 0, -- song index offset of top-left song in page
     cursorPos = 0, -- cursor position in page [0..cols * rows)
+    cursorX = 0,
+    cursorAnim = 0,
     memo = Memo.new(),
     jacketCache = jacketCache,
     images = {
@@ -276,6 +278,14 @@ SongTable.new = function(jacketCache)
   }
   setmetatable(this, {__index = SongTable})
   return this
+end
+
+SongTable.calc_cursor_point = function(this, pos)
+  local col = pos % this.cols
+  local row = math.floor(pos / this.cols)
+  local x = 154 + col * this.images.cursor.w
+  local y = 478 + row * this.images.cursor.h
+  return x, y
 end
 
 SongTable.set_index = function(this, newIndex)
@@ -339,10 +349,9 @@ SongTable.draw_song = function(this, pos, songIndex)
   local diff = song.difficulties[this.selectedDifficulty]
   if diff == nil then diff = song.difficulties[1] end
 
-  local col = pos % this.cols
-  local row = math.floor(pos / this.cols)
-  local x = 154 + col * this.images.cursor.w + 4
-  local y = 478 + row * this.images.cursor.h + 16
+  local x, y = this:calc_cursor_point(pos)
+  x = x + 4
+  y = y + 16
 
   -- Draw the background
   gfx.FillColor(255, 255, 255)
@@ -377,10 +386,7 @@ end
 SongTable.draw_cursor = function(this)
   gfx.Save()
 
-  local col = this.cursorPos % this.cols
-  local row = math.floor(this.cursorPos / this.cols)
-  local x = 154 + col * this.images.cursor.w
-  local y = 478 + row * this.images.cursor.h
+  local x, y = this:calc_cursor_point(this.cursorPos)
   gfx.FillColor(255, 255, 255)
 
   local t = currentTime % 1
