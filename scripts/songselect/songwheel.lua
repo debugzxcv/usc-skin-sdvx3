@@ -169,7 +169,7 @@ SongData.render = function(this, deltaTime)
 
   -- Draw the bpm
   -- FIXME: dot and dash was not rendered
-  levelFont:draw(song.bpm, 512, 63, 1, gfx.TEXT_ALIGN_LEFT, gfx.TEXT_ALIGN_MIDDLE)
+  bpmFont:draw(song.bpm, 512, 64, 1, gfx.TEXT_ALIGN_LEFT, gfx.TEXT_ALIGN_MIDDLE)
   -- gfx.LoadSkinFont("rounded-mplus-1c-bold.ttf")
   -- gfx.FontSize(32)
   -- gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BASELINE)
@@ -263,6 +263,7 @@ SongTable.new = function(jacketCache)
     memo = Memo.new(),
     jacketCache = jacketCache,
     images = {
+      matchingBg = Image.skin("song_select/matching_bg.png"),
       scoreBg = Image.skin("song_select/score_bg.png"),
       cursor = Image.skin("song_select/cursor.png"),
       cursorText = Image.skin("song_select/cursor_text.png"),
@@ -356,6 +357,9 @@ SongTable.draw_song = function(this, pos, songIndex)
   -- Draw the background
   gfx.FillColor(255, 255, 255)
   this.images.scoreBg:draw({ x = x + 72, y = y + 16 })
+  if diff.force then
+    this.images.matchingBg:draw({ x = x + 72, y = y - 62 })
+  end
   this.images.plates[diff.difficulty + 1]:draw({ x = x, y  = y })
 
   -- Draw the jacket
@@ -380,6 +384,12 @@ SongTable.draw_song = function(this, pos, songIndex)
   -- Draw the level
   local levelText = string.format("%02d", diff.level)
   levelFont:draw(levelText, x + 72, y + 56, 1, gfx.TEXT_ALIGN_CENTER, gfx.TEXT_ALIGN_MIDDLE)
+
+  -- Draw the volforce
+  if diff.force then
+    local forceText = string.format("%d", math.floor(diff.force * 100))
+    bpmFont:draw(forceText, x + 76, y - 60, 1, gfx.TEXT_ALIGN_CENTER, gfx.TEXT_ALIGN_MIDDLE)
+  end
 end
 
 -- Draw the song cursor
@@ -469,6 +479,12 @@ render = function(deltaTime)
 
   songData:render(deltaTime)
   songTable:render(deltaTime)
+
+  if songwheel.totalForce then
+    local forceText = string.format("%.2f", songwheel.totalForce)
+    gfx.FillColor(255, 255, 255)
+    bpmFont:draw(forceText, 10, 350, 1, gfx.TEXT_ALIGN_LEFT, gfx.TEXT_ALIGN_MIDDLE)
+  end
 end
 
 -- Callback
