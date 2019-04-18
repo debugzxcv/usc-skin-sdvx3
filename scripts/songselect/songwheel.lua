@@ -265,6 +265,7 @@ SongTable.new = function(jacketCache)
     images = {
       matchingBg = Image.skin("song_select/matching_bg.png"),
       scoreBg = Image.skin("song_select/score_bg.png"),
+      force = Image.skin("song_select/force.png"),
       cursor = Image.skin("song_select/cursor.png"),
       cursorText = Image.skin("song_select/cursor_text.png"),
       cursorDiamond = Image.skin("song_select/cursor_diamond.png"),
@@ -357,7 +358,7 @@ SongTable.draw_song = function(this, pos, songIndex)
   -- Draw the background
   gfx.FillColor(255, 255, 255)
   this.images.scoreBg:draw({ x = x + 72, y = y + 16 })
-  if diff.force then
+  if diff.force and diff.force > 0 then
     this.images.matchingBg:draw({ x = x + 72, y = y - 62 })
   end
   this.images.plates[diff.difficulty + 1]:draw({ x = x, y  = y })
@@ -386,9 +387,13 @@ SongTable.draw_song = function(this, pos, songIndex)
   levelFont:draw(levelText, x + 72, y + 56, 1, gfx.TEXT_ALIGN_CENTER, gfx.TEXT_ALIGN_MIDDLE)
 
   -- Draw the volforce
-  if diff.force then
+  if diff.force and diff.force > 0 then
     local forceText = string.format("%d", math.floor(diff.force * 100))
     bpmFont:draw(forceText, x + 76, y - 60, 1, gfx.TEXT_ALIGN_CENTER, gfx.TEXT_ALIGN_MIDDLE)
+  end
+
+  if diff.forceInTotal == 1 then
+    this.images.force:draw({x = x - 75, y = y - 60, w = 59, h = 59 })
   end
 end
 
@@ -483,7 +488,7 @@ render = function(deltaTime)
   if songwheel.totalForce then
     local forceText = string.format("%.2f", songwheel.totalForce)
     gfx.FillColor(255, 255, 255)
-    bpmFont:draw(forceText, 10, 350, 1, gfx.TEXT_ALIGN_LEFT, gfx.TEXT_ALIGN_MIDDLE)
+    bpmFont:draw(forceText, 20, 350, 1, gfx.TEXT_ALIGN_LEFT, gfx.TEXT_ALIGN_MIDDLE)
   end
 end
 
