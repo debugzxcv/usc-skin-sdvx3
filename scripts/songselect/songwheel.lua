@@ -258,8 +258,9 @@ SongTable.new = function(jacketCache)
     selectedDifficulty = 0,
     rowOffset = 0, -- song index offset of top-left song in page
     cursorPos = 0, -- cursor position in page [0..cols * rows)
-    cursorX = 0,
+    displayCursorPos = 0,
     cursorAnim = 0,
+    cursorAnimTotal = 0.1,
     memo = Memo.new(),
     jacketCache = jacketCache,
     images = {
@@ -284,7 +285,7 @@ end
 
 SongTable.calc_cursor_point = function(this, pos)
   local col = pos % this.cols
-  local row = math.floor(pos / this.cols)
+  local row = math.floor((pos) / this.cols)
   local x = 154 + col * this.images.cursor.w
   local y = 478 + row * this.images.cursor.h
   return x, y
@@ -300,6 +301,7 @@ SongTable.set_index = function(this, newIndex)
     local newOffset = newIndex - 1
     this.rowOffset = math.floor((newIndex - 1) / this.cols) * this.cols
     this.cursorPos = (newIndex - 1) - this.rowOffset
+    this.displayCursorPos = this.cursorPos
   else
     local newCursorPos = this.cursorPos + delta
 
@@ -317,7 +319,11 @@ SongTable.set_index = function(this, newIndex)
     else
       -- no scroll, move cursor in page
     end
+    if this.cursorAnim > 0 then
+      this.displayCursorPos = easing.outQuad(0.5 - this.cursorAnim, this.displayCursorPos, this.cursorPos - this.displayCursorPos, 0.5)
+    end
     this.cursorPos = newCursorPos
+    this.cursorAnim = this.cursorAnimTotal
   end
   this.selectedIndex = newIndex
 end
@@ -331,7 +337,7 @@ end
 
 SongTable.render = function(this, deltaTime)
   this:draw_songs()
-  this:draw_cursor()
+  this:draw_cursor(deltaTime)
 end
 
 SongTable.draw_songs = function(this)
@@ -398,10 +404,21 @@ SongTable.draw_song = function(this, pos, songIndex)
 end
 
 -- Draw the song cursor
-SongTable.draw_cursor = function(this)
+SongTable.draw_cursor = function(this, deltaTime)
   gfx.Save()
 
-  local x, y = this:calc_cursor_point(this.cursorPos)
+  local pos = this.displayCursorPos
+  if this.cursorAnim > 0 then
+    this.cursorAnim = this.cursorAnim - deltaTime
+    if this.cursorAnim <= 0 then
+      this.displayCursorPos = this.cursorPos
+      pos = this.cursorPos
+    else
+      pos = easing.outQuad(this.cursorAnimTotal - this.cursorAnim, this.displayCursorPos, this.cursorPos - this.displayCursorPos, this.cursorAnimTotal)
+    end
+  end
+
+  local x, y = this:calc_cursor_point(pos)
   gfx.FillColor(255, 255, 255)
 
   local t = currentTime % 1
