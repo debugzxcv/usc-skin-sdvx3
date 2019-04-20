@@ -502,6 +502,7 @@ local diffImages = {
     gfx.CreateSkinImage("diff/exhaust.png", 0),
     gfx.CreateSkinImage("diff/gravity.png", 0)
 }
+local memo = Memo.new()
 
 function draw_song_info(deltaTime)
     local jacketWidth = 75
@@ -538,17 +539,15 @@ function draw_song_info(deltaTime)
     draw_number(78, 0, 1.0, gameplay.level, 2, numberImages, false)
 
     -- Draw the song title, scaled to fit as best as possible
-    local title = gameplay.title .. " / " .. gameplay.artist
-    local titleWidth = 520
-    gfx.Save()
-    gfx.TextAlign(gfx.TEXT_ALIGN_CENTER)
-    gfx.FontSize(18)
-    x1, y1, x2, y2 = gfx.TextBounds(0, 0, title)
-    local textScale = math.min(titleWidth / x2, 1)
-    gfx.Translate(desw / 2, portrait and -290 or -90)
-    gfx.Scale(textScale, 1)
-    gfx.Text(title, 0, 0)
-    gfx.Restore()
+    local title = memo:memoize("title", function ()
+        local titleText = gameplay.title .. " / " .. gameplay.artist
+        local titleWidth = 520
+        gfx.LoadSkinFont("rounded-mplus-1c-bold.ttf")
+        return gfx.CreateLabel(titleText, 18, 0)
+    end)
+    gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_BASELINE)
+    gfx.FillColor(255, 255, 255, 255)
+    gfx.DrawLabel(title, desw / 2, portrait and -307 or -90, 470)
 
     -- Draw the BPM
     gfx.FillColor(255,255,255)
