@@ -176,8 +176,6 @@ local consoleAnimImages = {
 local introTimer = 2
 local outroTimer = 0
 
-local alertTimers = {-2,-2}
-
 local earlateTimer = 0
 local critAnimTimer = 0
 
@@ -739,6 +737,11 @@ function draw_earlate(deltaTime)
 end
 -- -------------------------------------------------------------------------- --
 -- draw_alerts:                                                               --
+local alertTimers = {-2,-2}
+local alertBg = Image.skin("alert_bg.png")
+local alertL = Image.skin("alert_l.png")
+local alertR = Image.skin("alert_r.png")
+
 function draw_alerts(deltaTime)
     alertTimers[1] = math.max(alertTimers[1] - deltaTime,-2)
     alertTimers[2] = math.max(alertTimers[2] - deltaTime,-2)
@@ -755,18 +758,10 @@ function draw_alerts(deltaTime)
         local alertScale = (-(alertTimers[1] ^ 2.0) + (1.5 * alertTimers[1])) * 5.0
         alertScale = math.min(alertScale, 1)
         gfx.Scale(1, alertScale)
-        gfx.BeginPath()
-        gfx.RoundedRectVarying(-50,-50,100,100,20,0,20,0)
-        gfx.StrokeColor(r,g,b)
-        gfx.FillColor(20,20,20)
-        gfx.StrokeWidth(2)
-        gfx.Fill()
-        gfx.Stroke()
-        gfx.BeginPath()
-        gfx.FillColor(r,g,b)
-        gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_MIDDLE)
-        gfx.FontSize(90)
-        gfx.Text("L",0,0)
+        gfx.FillColor(r, g, b)
+        alertBg:draw({ x = 0, y = 0 })
+        gfx.FillColor(255, 255, 255)
+        alertL:draw({ x = 0, y = 0 })
         gfx.Restore()
     end
     if alertTimers[2] > 0 then --draw right alert
@@ -782,18 +777,10 @@ function draw_alerts(deltaTime)
         local alertScale = (-(alertTimers[2] ^ 2.0) + (1.5 * alertTimers[2])) * 5.0
         alertScale = math.min(alertScale, 1)
         gfx.Scale(1, alertScale)
-        gfx.BeginPath()
-        gfx.RoundedRectVarying(-50,-50,100,100,0,20,0,20)
-        gfx.StrokeColor(r,g,b)
-        gfx.FillColor(20,20,20)
-        gfx.StrokeWidth(2)
-        gfx.Fill()
-        gfx.Stroke()
-        gfx.BeginPath()
-        gfx.FillColor(r,g,b)
-        gfx.TextAlign(gfx.TEXT_ALIGN_CENTER + gfx.TEXT_ALIGN_MIDDLE)
-        gfx.FontSize(90)
-        gfx.Text("R",0,0)
+        gfx.FillColor(r, g, b)
+        alertBg:draw({ x = 0, y = 0 })
+        gfx.FillColor(255, 255, 255)
+        alertR:draw({ x = 0, y = 0 })
         gfx.Restore()
     end
 end
