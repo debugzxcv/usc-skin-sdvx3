@@ -593,7 +593,7 @@ function draw_best_diff(deltaTime, x, y)
     local prefix = " " -- used to properly display negative values
 
     gfx.BeginPath()
-    gfx.FontSize(40)
+    gfx.FontSize(30)
 
     gfx.FillColor(255, 255, 255)
     if difference < 0 then
@@ -606,7 +606,7 @@ function draw_best_diff(deltaTime, x, y)
     -- %08d formats a number to 8 characters
     -- This includes the minus sign, so we do that separately
     gfx.LoadSkinFont("NovaMono.ttf")
-    gfx.FontSize(48)
+    gfx.FontSize(40)
     gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_TOP)
     gfx.Text(string.format("%s%08d", prefix, difference), x, y)
 end
@@ -800,15 +800,17 @@ function draw_alerts(deltaTime)
 end
 -- -------------------------------------------------------------------------- --
 -- draw_status:                                                               --
-local statusBack = gfx.CreateSkinImage("status_back.png", 0)
+local statusBack = Image.skin("status_back.png")
+local apealCard = Image.skin("apeal_card.png")
 function draw_status(deltaTime)
     -- Draw the background
-    tw, th = gfx.ImageSize(statusBack)
     gfx.FillColor(255, 255, 255)
-    gfx.BeginPath()
-    gfx.ImageRect(0, desh / 2 - th / 2, tw, th, statusBack, 1, 0)
+    statusBack:draw({ x = -40, y = desh / 2, anchor_h = Image.ANCHOR_LEFT })
 
-    draw_best_diff(deltaTime, 40, desh / 2 - 10)
+    -- Draw the apeal card
+    apealCard:draw({ x = 4, y = desh / 2 - 94, w = apealCard.w * 0.75, h = apealCard.h * 0.75, anchor_h = Image.ANCHOR_LEFT, anchor_v = Image.ANCHOR_TOP })
+
+    draw_best_diff(deltaTime, 40, desh / 2 - 7)
 end
 
 -- -------------------------------------------------------------------------- --
