@@ -564,8 +564,6 @@ end
 
 -- callback
 songs_changed = function(withAll)
-  if not withAll then return end
-
   local diffsById = {}
 	local diffs = {}
 	for i = 1, #songwheel.allSongs do
