@@ -5,6 +5,8 @@ gfx.LoadSkinFont("rounded-mplus-1c-bold.ttf")
 game.LoadSkinSample("cursor_song")
 game.LoadSkinSample("cursor_difficulty")
 
+local resx, resy = game.GetResolution()
+
 local levelFont = ImageFont.new("font-level", "0123456789")
 local largeFont = ImageFont.new("font-large", "0123456789")
 local bpmFont = ImageFont.new("number", "0123456789.") -- FIXME: font-default
@@ -476,6 +478,39 @@ get_page_size = function()
   return 12
 end
 
+searchIndex = 1
+soffset = 0
+searchText = gfx.CreateLabel("", 5, 0)
+
+draw_search = function(x,y,w,h)
+  soffset = soffset + (searchIndex) - (songwheel.searchInputActive and 0 or 1)
+  if searchIndex ~= (songwheel.searchInputActive and 0 or 1) then
+      game.PlaySample("woosh")
+  end
+  searchIndex = songwheel.searchInputActive and 0 or 1
+
+  gfx.BeginPath()
+  local bgfade = 1 - (searchIndex + soffset)
+  --if not songwheel.searchInputActive then bgfade = soffset end
+  gfx.FillColor(0,0,0,math.floor(200 * bgfade))
+  gfx.Rect(0,0,resx,resy)
+  gfx.Fill()
+  gfx.ForceRender()
+  local xpos = x + (searchIndex + soffset)*w
+  gfx.UpdateLabel(searchText ,string.format("Search: %s",songwheel.searchText), 30, 0)
+  gfx.BeginPath()
+  gfx.RoundedRect(xpos,y,w,h,h/2)
+  gfx.FillColor(30,30,30)
+  gfx.StrokeColor(0,128,255)
+  gfx.StrokeWidth(1)
+  gfx.Fill()
+  gfx.Stroke()
+  gfx.BeginPath();
+  gfx.LoadSkinFont("segoeui.ttf");
+  gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_MIDDLE);
+  gfx.DrawLabel(searchText, xpos+10,y+(h/2), w-20)
+end
+
 -- Callback
 render = function(deltaTime)
   currentTime = currentTime + deltaTime
@@ -488,7 +523,6 @@ render = function(deltaTime)
 
   gfx.ResetTransform()
 
-  local resx, resy = game.GetResolution()
   local desw = 720
   local desh = 1280
   local scale = resy / desh
@@ -516,7 +550,10 @@ render = function(deltaTime)
 		gfx.FontSize(20)
 		gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BOTTOM)
 		gfx.Text(songwheel.searchStatus, 3, desh)
-	end
+  end
+
+  soffset = soffset * 0.8
+  draw_search(120, 5, 600, 40)
 end
 
 -- Callback
