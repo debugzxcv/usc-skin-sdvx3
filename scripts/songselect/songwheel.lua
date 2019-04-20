@@ -507,6 +507,16 @@ render = function(deltaTime)
     -- gfx.SetImageTint(255, 254, 2)
     bpmFont:draw(forceText, 140, 353, 1, gfx.TEXT_ALIGN_LEFT, gfx.TEXT_ALIGN_MIDDLE)
   end
+
+  -- Draw the search status
+	if songwheel.searchStatus then
+    gfx.BeginPath()
+    gfx.LoadSkinFont("segoeui.ttf")
+		gfx.FillColor(255, 255, 255)
+		gfx.FontSize(20)
+		gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BOTTOM)
+		gfx.Text(songwheel.searchStatus, 3, desh)
+	end
 end
 
 -- Callback
