@@ -802,6 +802,7 @@ end
 -- draw_status:                                                               --
 local statusBack = Image.skin("status_back.png")
 local apealCard = Image.skin("apeal_card.png")
+local trophy = Image.skin("trophy.png")
 function draw_status(deltaTime)
     -- Draw the background
     gfx.FillColor(255, 255, 255)
@@ -809,6 +810,9 @@ function draw_status(deltaTime)
 
     -- Draw the apeal card
     apealCard:draw({ x = 4, y = desh / 2 - 94, w = apealCard.w * 0.75, h = apealCard.h * 0.75, anchor_h = Image.ANCHOR_LEFT, anchor_v = Image.ANCHOR_TOP })
+
+    -- Draw the trophy
+    trophy:draw({ x = 140, y = desh / 2 - 30, w = trophy.w * 0.5, h = trophy.h * 0.5 })
 
     draw_best_diff(deltaTime, 40, desh / 2 - 7)
 end
