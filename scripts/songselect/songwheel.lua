@@ -169,6 +169,17 @@ SongData.render = function(this, deltaTime)
   gfx.FillColor(255, 255, 255, 255)
   gfx.DrawLabel(effector, 375, 77, 320)
 
+  -- Draw the illustrator
+  if diff.illustrator then
+    local illustrator = this.memo:memoize(string.format("ill_%s_%s", song.id, diff.id), function ()
+      gfx.LoadSkinFont("rounded-mplus-1c-bold.ttf")
+      return gfx.CreateLabel(diff.illustrator, 16, 0)
+    end)
+    gfx.TextAlign(gfx.TEXT_ALIGN_LEFT + gfx.TEXT_ALIGN_BASELINE)
+    gfx.FillColor(255, 255, 255, 255)
+    gfx.DrawLabel(illustrator, 375, 100, 320)
+  end
+
   -- Draw the bpm
   -- FIXME: dot and dash was not rendered
   bpmFont:draw(song.bpm, 512, 64, 1, gfx.TEXT_ALIGN_LEFT, gfx.TEXT_ALIGN_MIDDLE)
