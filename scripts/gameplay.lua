@@ -612,7 +612,7 @@ end
 local scoreBack = gfx.CreateSkinImage("score_back.png", 0)
 local scoreNumberLarge = load_number_image("score_l")
 local scoreNumberSmall = load_number_image("score_s")
-
+local maxCombo = 0
 function draw_score(deltaTime)
     local tw, th = gfx.ImageSize(scoreBack)
     gfx.FillColor(255, 255, 255)
@@ -622,6 +622,10 @@ function draw_score(deltaTime)
     gfx.FillColor(255, 255, 255)
     draw_number(desw - 188, portrait and -46 or 64, 1.0, math.floor(score / 1000), 5, scoreNumberLarge, false)
     draw_number(desw - 56, portrait and -42 or 68, 1.0, score, 3, scoreNumberSmall, false)
+
+    -- Draw max combo
+    gfx.FillColor(255, 255, 255)
+    draw_number(desw - 222, portrait and 0 or 110, 1.0, maxCombo, 4, numberImages, false)
 end
 -- -------------------------------------------------------------------------- --
 -- draw_gauge:                                                                --
@@ -670,7 +674,6 @@ local comboBottom = gfx.CreateSkinImage("chain/chain.png", 0)
 local comboDigits = load_number_image("chain")
 local comboTimer = 0
 local combo = 0
-local maxCombo = 0
 function draw_combo(deltaTime)
     if combo == 0 then return end
     comboTimer = comboTimer + deltaTime
@@ -711,10 +714,6 @@ function draw_combo(deltaTime)
     digit = math.floor(combo / 1000) % 10
     gfx.BeginPath()
     gfx.ImageRect(posx - tw * 2, posy - th / 2, tw, th, comboDigits[digit + 1], combo >= 1000 and alpha or 0.2, 0)
-
-    -- Draw max combo
-    gfx.FillColor(255, 255, 255)
-    draw_number(desw - 222, portrait and 315 or 110, 1.0, maxCombo, 4, numberImages, false)
 end
 -- -------------------------------------------------------------------------- --
 -- draw_earlate:                                                              --
