@@ -519,7 +519,7 @@ function draw_song_info(deltaTime)
     gfx.LoadSkinFont("segoeui.ttf")
 
     -- Draw the background
-    tw, th = gfx.ImageSize(songBack)
+    local tw, th = gfx.ImageSize(songBack)
     gfx.FillColor(255,255,255)
     gfx.BeginPath()
     gfx.ImageRect(-20, -110, tw, th, songBack, 1, 0)
@@ -612,9 +612,9 @@ end
 local scoreBack = gfx.CreateSkinImage("score_back.png", 0)
 local scoreNumberLarge = load_number_image("score_l")
 local scoreNumberSmall = load_number_image("score_s")
-
+local maxCombo = 0
 function draw_score(deltaTime)
-    tw, th = gfx.ImageSize(scoreBack)
+    local tw, th = gfx.ImageSize(scoreBack)
     gfx.FillColor(255, 255, 255)
     gfx.BeginPath()
     gfx.ImageRect(desw - tw + 12, portrait and -110 or 0, tw, th, scoreBack, 1, 0)
@@ -622,6 +622,10 @@ function draw_score(deltaTime)
     gfx.FillColor(255, 255, 255)
     draw_number(desw - 188, portrait and -46 or 64, 1.0, math.floor(score / 1000), 5, scoreNumberLarge, false)
     draw_number(desw - 56, portrait and -42 or 68, 1.0, score, 3, scoreNumberSmall, false)
+
+    -- Draw max combo
+    gfx.FillColor(255, 255, 255)
+    draw_number(desw - 222, portrait and 0 or 110, 1.0, maxCombo, 4, numberImages, false)
 end
 -- -------------------------------------------------------------------------- --
 -- draw_gauge:                                                                --
@@ -670,7 +674,6 @@ local comboBottom = gfx.CreateSkinImage("chain/chain.png", 0)
 local comboDigits = load_number_image("chain")
 local comboTimer = 0
 local combo = 0
-local maxCombo = 0
 function draw_combo(deltaTime)
     if combo == 0 then return end
     comboTimer = comboTimer + deltaTime
@@ -688,6 +691,7 @@ function draw_combo(deltaTime)
     alpha = (alpha * 100 + 155) / 255
 
     -- \_ chain _/
+    local tw, th
     tw, th = gfx.ImageSize(comboBottom)
     gfx.BeginPath()
     gfx.ImageRect(posx - tw / 2, posy - th / 2, tw, th, comboBottom, alpha, 0)
@@ -710,10 +714,6 @@ function draw_combo(deltaTime)
     digit = math.floor(combo / 1000) % 10
     gfx.BeginPath()
     gfx.ImageRect(posx - tw * 2, posy - th / 2, tw, th, comboDigits[digit + 1], combo >= 1000 and alpha or 0.2, 0)
-
-    -- Draw max combo
-    gfx.FillColor(255, 255, 255)
-    draw_number(desw - 222, portrait and 315 or 110, 1.0, maxCombo, 4, numberImages, false)
 end
 -- -------------------------------------------------------------------------- --
 -- draw_earlate:                                                              --
@@ -727,6 +727,7 @@ function draw_earlate(deltaTime)
     local xpos = desw / 2
     local ypos = desh * critLinePos[1] - 450
     if portrait then ypos = desh * critLinePos[2] - 450 end
+    local tw, th
     if late then
         tw, th = gfx.ImageSize(scoreLate)
         gfx.ImageRect(xpos - tw / 2, ypos - th / 2, tw, th, scoreLate, alpha, 0)
@@ -754,7 +755,7 @@ function draw_alerts(deltaTime)
             posx = 65
         end
         gfx.Translate(posx,posy)
-        r,g,b = game.GetLaserColor(0)
+        local r,g,b = game.GetLaserColor(0)
         local alertScale = (-(alertTimers[1] ^ 2.0) + (1.5 * alertTimers[1])) * 5.0
         alertScale = math.min(alertScale, 1)
         gfx.Scale(1, alertScale)
@@ -773,7 +774,7 @@ function draw_alerts(deltaTime)
             posx = desw - 65
         end
         gfx.Translate(posx,posy)
-        r,g,b = game.GetLaserColor(1)
+        local r,g,b = game.GetLaserColor(1)
         local alertScale = (-(alertTimers[2] ^ 2.0) + (1.5 * alertTimers[2])) * 5.0
         alertScale = math.min(alertScale, 1)
         gfx.Scale(1, alertScale)

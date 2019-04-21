@@ -32,7 +32,7 @@ Image = {
 }
 Image.skin = function(filename, imageFlags)
   imageFlags = imageFlags or 0
-  image = gfx.CreateSkinImage(filename, imageFlags)
+  local image = gfx.CreateSkinImage(filename, imageFlags)
   return Image.wrap(image)
 end
 Image.wrap = function(image)
